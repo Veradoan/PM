@@ -1,13 +1,12 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="container mt-4">
     <h2>Không gian kiểm duyệt (Moderator Workspace)</h2>
     <hr>
-    
-    <!-- PHẦN 1: CÁC THẺ THỐNG KÊ (Dựa theo ảnh bạn cung cấp) -->
+
+    <!-- PHẦN 1: CÁC THẺ THỐNG KÊ -->
     <div class="row mb-4">
-        <!-- Thẻ Tài liệu chờ duyệt -->
         <div class="col-md-4 col-sm-6 mb-3">
             <div class="card bg-warning text-dark h-100" style="border-radius: 10px;">
                 <div class="card-body">
@@ -17,8 +16,7 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Thẻ Báo cáo chờ xử lý -->
+
         <div class="col-md-4 col-sm-6 mb-3">
             <a href="{% url 'pending_reports' %}" style="text-decoration: none;">
                 <div class="card bg-danger text-white h-100" style="border-radius: 10px;">
@@ -30,8 +28,7 @@
                 </div>
             </a>
         </div>
-        
-        <!-- Thẻ Lịch sử / Hoạt động (Có thể link qua trang Lịch sử) -->
+
         <div class="col-md-4 col-sm-6 mb-3">
             <a href="{% url 'moderation_history' %}" style="text-decoration: none;">
                 <div class="card bg-info text-white h-100" style="border-radius: 10px;">
@@ -47,7 +44,7 @@
 
     <!-- PHẦN 2: BẢNG DANH SÁCH TÀI LIỆU CHỜ DUYỆT -->
     <h4 class="mb-3">Danh sách chi tiết</h4>
-    
+
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
@@ -71,8 +68,14 @@
             <tbody>
                 {% for doc in documents %}
                 <tr>
-                    <td><a href="#">{{ doc.title }}</a></td>
-                    <td>{{ doc.user.username }}</td>
+                    <td>
+                        {% if doc.file %}
+                            <a href="{{ doc.file.url }}" target="_blank">{{ doc.title }}</a>
+                        {% else %}
+                            {{ doc.title }}
+                        {% endif %}
+                    </td>
+                    <td>{{ doc.uploaded_by.username }}</td>
                     <td>{{ doc.created_at|date:"d/m/Y H:i" }}</td>
                     <td>
                         <!-- FORM NÚT DUYỆT (Gửi POST) -->
@@ -90,7 +93,7 @@
                             <i class="fas fa-times"></i> Từ chối
                         </button>
 
-                        <!-- MODAL TỪ CHỐI (Chứa form POST và ô nhập lý do) -->
+                        <!-- MODAL TỪ CHỐI -->
                         <div class="modal fade" id="rejectModal{{ doc.id }}" tabindex="-1"
                             aria-labelledby="rejectLabel{{ doc.id }}" aria-hidden="true">
                             <div class="modal-dialog">
@@ -98,8 +101,7 @@
                                     <form action="{% url 'api_reject_document' doc.id %}" method="POST">
                                         {% csrf_token %}
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="rejectLabel{{ doc.id }}">Từ chối tài liệu: {{
-                                                doc.title }}</h5>
+                                            <h5 class="modal-title" id="rejectLabel{{ doc.id }}">Từ chối tài liệu: {{ doc.title }}</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
                                         </div>

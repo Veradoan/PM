@@ -1,4 +1,3 @@
-
 from django.urls import path
 from . import views, views_admin
 
@@ -6,6 +5,7 @@ from . import views, views_admin
 urlpatterns = [
     # ==================== DOCUMENT ====================
     path('list/', views.document_list, name='document_list'),
+    path('contact/', views.contact, name='contact'),
     path('search/', views.search_view, name='search'),
     path('detail/<int:id>/', views.document_detail, name='document_detail'),
 

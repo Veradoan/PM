@@ -89,11 +89,7 @@ class Document(models.Model):
         default='pending'
     )
 
-    review_note = models.TextField(
-        blank=True,
-        null=True
-    )
-
+   
     ai_summary = models.TextField(
         blank=True,
         null=True

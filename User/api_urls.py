@@ -1,7 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .api_views import LoginAPIView, MeAPIView
 from .api_views import LoginAPIView, MeAPIView, change_user_role
 
 urlpatterns = [
