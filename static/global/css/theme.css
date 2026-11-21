@@ -1,0 +1,499 @@
+/* =====================================================================
+   theme.css — làm mới giao diện (chỉ chữ + background)
+   Nạp SAU CÙNG trong base.html để ghi đè main.css / style-pc.css / smart.css.
+   Không đụng tới HTML nội dung hay logic Django.
+   ===================================================================== */
+
+:root {
+    --ink:      #14213D;   /* chữ tiêu đề, nền thanh trên cùng */
+    --text:     #36425C;   /* chữ nội dung */
+    --muted:    #6B768D;   /* chữ phụ */
+    --accent:   #0B7A75;   /* link, nút, điểm nhấn */
+    --accent-d: #075B57;   /* hover */
+    --marker:   #FFD35C;   /* gạch chân tiêu đề trang */
+    --paper:    #EEF2F6;   /* nền trang */
+    --chip:     #E1E8F1;   /* nền ô thông tin nhỏ */
+    --line:     #D5DDE8;   /* đường kẻ mảnh */
+    --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --sans:  'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* ---------- Nền trang + chữ gốc ---------- */
+html body {
+    background-color: var(--paper);
+    background-image: radial-gradient(rgba(20, 33, 61, .10) 1px, transparent 1px);
+    background-size: 24px 24px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--marker); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+body a { color: var(--accent); }
+body a:hover { color: var(--accent-d); }
+
+/* ---------- Thanh liên hệ trên cùng ---------- */
+body .header_top { background: var(--ink); }
+body .contactinfo ul li a {
+    color: #C6D1E5;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 400;
+    letter-spacing: .01em;
+}
+body .contactinfo ul li a:hover { color: #fff; background: transparent; }
+
+/* ---------- Thanh menu ---------- */
+body #header .header-bottom {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+}
+body .mainmenu ul li a {
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+}
+body .mainmenu ul li a:hover,
+body .mainmenu ul li a.active,
+body .shop-menu ul li a.active {
+    background: none;
+    color: var(--ink);
+}
+/* gạch chân vàng cho tất cả mục menu */
+body .mainmenu ul li a { box-shadow: inset 0 -2px 0 var(--marker); }
+
+body .shop-menu ul li a {
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+}
+body .shop-menu ul li a:hover { background: transparent; color: var(--ink); }
+/* gạch chân vàng cho Account / Login, giống mục Home */
+body .shop-menu ul li a { box-shadow: inset 0 -2px 0 var(--marker); }
+
+/* ---------- Tiêu đề trang ---------- */
+body h2.title {
+    border-bottom: 0 none;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: clamp(26px, 4vw, 36px);
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1.2;
+    text-transform: none;
+}
+body h2.title:before { display: none; }          /* bỏ khối nền trắng che đường kẻ cũ */
+body h2.title:after {                             /* đường kẻ cũ -> gạch marker ngắn */
+    border: 0 none;
+    bottom: -14px;
+    left: 50%;
+    width: 56px;
+    height: 4px;
+    margin-left: -28px;
+    background: var(--marker);
+    z-index: auto;
+}
+
+/* ---------- Danh sách tài liệu ---------- */
+body .blog-post-area .single-blog-post h3 {
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -.005em;
+    line-height: 1.3;
+    text-transform: none;
+    margin-bottom: 14px;
+}
+body .blog-post-area .single-blog-post p {
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+}
+body .blog-post-area .single-blog-post p strong {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+/* thông tin ngày đăng / người đăng */
+body .blog-post-area .post-meta ul li {
+    background: var(--chip);
+    color: #44506A;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 500;
+}
+body .blog-post-area .post-meta ul li i {
+    background: var(--accent);
+    color: #fff;
+}
+body .blog-post-area .post-meta ul li i:after { border-left-color: var(--accent); }
+
+/* ---------- Nút ---------- */
+body .btn.btn-primary,
+body .blog-post-area .single-blog-post .btn-primary {
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    text-transform: none;
+}
+body .btn.btn-primary:hover,
+body .btn.btn-primary:focus,
+body .btn.btn-primary:active,
+body .blog-post-area .single-blog-post .btn-primary:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ---------- Phân trang ---------- */
+body .pagination-area .pagination li a {
+    background: var(--chip);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 500;
+}
+body .pagination-area .pagination li a:hover,
+body .pagination-area .pagination li a.active,
+body .pagination-area .pagination li .active {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* =====================================================================
+   ICON — Font Awesome không tải được nên hiện ô vuông.
+   Thay bằng icon SVG nhúng sẵn (đổi màu theo chữ). Không cần sửa HTML.
+   Muốn tắt: xoá hoặc comment các rule bên dưới.
+   ===================================================================== */
+body i.fa { font-family: inherit; font-style: normal; line-height: 1; }
+body i.fa:before {
+    content: "";
+    display: inline-block;
+    width: 1.05em;
+    height: 1.05em;
+    vertical-align: -0.16em;
+    background-color: currentColor;
+    -webkit-mask: var(--ico) center / contain no-repeat;
+            mask: var(--ico) center / contain no-repeat;
+}
+body i.fa.fa-user { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7'/%3E%3C/svg%3E"); }
+body i.fa.fa-lock { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4'/%3E%3Cpath d='M10 17l5-5-5-5'/%3E%3Cpath d='M15 12H3'/%3E%3C/svg%3E"); }
+body i.fa.fa-sign-out { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpath d='M16 17l5-5-5-5'/%3E%3Cpath d='M21 12H9'/%3E%3C/svg%3E"); }
+body i.fa.fa-upload { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpath d='M17 8l-5-5-5 5'/%3E%3Cpath d='M12 3v12'/%3E%3C/svg%3E"); }
+body i.fa.fa-download { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3Cpath d='M12 15V3'/%3E%3C/svg%3E"); }
+body i.fa.fa-file-text { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3Cpath d='M8 13h8M8 17h8M8 9h2'/%3E%3C/svg%3E"); }
+body i.fa.fa-file { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3C/svg%3E"); }
+body i.fa.fa-clock-o { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
+body i.fa.fa-phone { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z'/%3E%3C/svg%3E"); }
+body i.fa.fa-envelope { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Cpath d='m3 7 9 6 9-6'/%3E%3C/svg%3E"); }
+body i.fa.fa-angle-down { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+body i.fa.fa-angle-left { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 18-6-6 6-6'/%3E%3C/svg%3E"); }
+body i.fa.fa-angle-right { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E"); }
+body i.fa.fa-shopping-cart { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/%3E%3C/svg%3E"); }
+body i.fa.fa-plus { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E"); }
+body i.fa.fa-plus-square { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M12 8v8M8 12h8'/%3E%3C/svg%3E"); }
+body i.fa.fa-flag { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 22V4'/%3E%3Cpath d='M4 4h13l-2 4 2 4H4'/%3E%3C/svg%3E"); }
+body i.fa.fa-check { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
+body .blog-post-area .post-meta ul li i.fa { font-size: 12px; }
+body .contactinfo ul li a i.fa { margin-right: 6px; }
+body .shop-menu ul li a i.fa { margin-right: 0; }
+body .mainmenu ul li a i.fa-angle-down { margin-left: 4px; }
+
+/* =====================================================================
+   TUỲ CHỌN — nền dạng thẻ cho từng tài liệu.
+   Cần thêm khoảng đệm nên hơi vượt ngoài "chỉ chữ + background".
+   Không thích thì xoá nguyên khối này, phần trên vẫn chạy bình thường.
+   ===================================================================== */
+body .blog-post-area .single-blog-post {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    padding: 26px 28px;
+    margin-bottom: 22px;
+}
+/* ---------- Tên website (logo chữ) ---------- */
+body .brand-name {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1;
+    color: var(--ink);
+    margin: 24px 36px 0 0;
+    text-decoration: none;
+}
+body .brand-name span { color: var(--accent); }
+body .brand-name:hover,
+body .brand-name:focus { color: var(--ink); text-decoration: none; }
+body .brand-name:hover span { color: var(--accent-d); }
+
+/* ---------- Căn thẳng hàng: tên web / menu / Account-Login (desktop) ---------- */
+@media (min-width: 768px) {
+    body #header .header-bottom { padding-top: 26px; padding-bottom: 20px; }
+    body #header .header-bottom .row { display: flex; align-items: center; }
+    body #header .header-bottom .row:before,
+    body #header .header-bottom .row:after { display: none; }
+    body #header .header-bottom .col-sm-9 { display: flex; align-items: center; }
+    body #header .header-bottom .navbar-header { display: none; }
+    body .brand-name { margin: 0 40px 0 0; padding-bottom: 10px; }
+    body .mainmenu { margin: 0; }
+    body .shop-menu { margin: 0; }
+    body .shop-menu ul li a { margin-top: 0; padding-bottom: 10px; }
+}
+
+/* ---------- Khôi phục .container ----------
+   style-sp.css (bản cho điện thoại) ghi đè .container: width:auto, căn giữa chữ,
+   padding 30px 2% -> làm giao diện bị kéo giãn. Trả về như Bootstrap gốc. */
+body .container { text-align: left; padding: 0 15px; }
+@media (min-width: 768px)  { body .container { width: 750px; } }
+@media (min-width: 992px)  { body .container { width: 970px; } }
+@media (min-width: 1200px) { body .container { width: 1170px; } }
+
+/* icon bổ sung cho menu */
+body i.fa.fa-home { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'/%3E%3C/svg%3E"); }
+body i.fa.fa-search { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E"); }
+body i.fa.fa-bell { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9'/%3E%3Cpath d='M13.7 21a2 2 0 0 1-3.4 0'/%3E%3C/svg%3E"); }
+body i.fa.fa-book { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/%3E%3C/svg%3E"); }
+
+/* ---------- Menu gọn, luôn nằm trên một hàng ---------- */
+@media (min-width: 768px) {
+    body #header .header-bottom .col-sm-9 { flex: 1 1 auto; width: auto; max-width: none; }
+    body #header .header-bottom .col-sm-3 { flex: 0 0 auto; width: auto; }
+    body .mainmenu { white-space: nowrap; }
+    body .mainmenu ul li { padding-left: 8px; padding-right: 8px; }
+    body .mainmenu ul li a { font-size: 14.5px; }
+    body .brand-name { margin-right: 24px; }
+}
+
+/* =====================================================================
+   KHUNG NỘI DUNG DÙNG CHUNG (mọi trang)
+   Thẻ trắng bo góc, vạch trên: đoạn vàng ngắn nối vạch teal, bóng hai lớp.
+   ===================================================================== */
+
+/* --- Tiêu đề trang: banner --- */
+body .blog-post-area h2.title {
+    display: inline-block;
+    max-width: 100%;
+    word-break: break-word;
+    color: #F6E7C1;
+    font-family: var(--serif);
+    font-size: clamp(28px, 3.6vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    text-align: left;
+    margin: 44px 0 36px;
+    padding: 14px 30px 14px 24px;
+    background: linear-gradient(120deg, rgba(11, 122, 117, 0.92), rgba(20, 33, 61, 0.90));
+    border-left: 5px solid var(--marker);
+    border-radius: 0 12px 12px 0;
+    box-shadow: 0 10px 28px rgba(20, 33, 61, 0.28);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+body .blog-post-area h2.title:after { display: none; }
+
+/* --- Khung (panel) --- */
+body .blog-post-area .single-blog-post,
+body .blog-post-area > form,
+body .signup-form,
+body .left-sidebar,
+body .blog-post-area .response-area {
+    background-color: rgba(255, 255, 255, 0.96);
+    background-image: linear-gradient(90deg, var(--marker) 0, var(--marker) 72px, var(--accent) 72px, var(--accent) 100%);
+    background-size: 100% 3px;
+    background-repeat: no-repeat;
+    background-position: top left;
+    border: 1px solid rgba(20, 33, 61, 0.08) !important;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(20, 33, 61, 0.10), 0 16px 36px rgba(20, 33, 61, 0.16);
+    padding: 30px 34px 28px !important;
+    margin-bottom: 24px;
+}
+body .blog-post-area .single-blog-post { transition: transform .15s ease, box-shadow .15s ease; }
+body .blog-post-area .single-blog-post:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 1px 2px rgba(20, 33, 61, 0.10), 0 20px 42px rgba(20, 33, 61, 0.22);
+}
+body .left-sidebar { margin-top: 44px; }
+
+/* --- Tiêu đề trong khung: gạch dưới + nhấn teal --- */
+body .blog-post-area .single-blog-post h3,
+body .signup-form h2,
+body .left-sidebar h2,
+body .blog-post-area .response-area h2.bold {
+    position: relative;
+    background: none;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-weight: 700;
+    text-transform: none;
+    text-align: left;
+    padding: 0 0 14px;
+    margin: 0 0 18px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+}
+body .blog-post-area .single-blog-post h3 { font-size: 23px; line-height: 1.3; }
+body .signup-form h2,
+body .left-sidebar h2,
+body .blog-post-area .response-area h2.bold { font-size: 22px; }
+body .left-sidebar h2:before { display: none; }
+body .blog-post-area .single-blog-post h3:after,
+body .signup-form h2:after,
+body .left-sidebar h2:after,
+body .blog-post-area .response-area h2.bold:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 64px;
+    height: 3px;
+    border: 0;
+    background: var(--accent);
+    z-index: auto;
+}
+body .blog-post-area .single-blog-post h3 + .post-meta,
+body .blog-post-area .single-blog-post .post-meta { margin-bottom: 16px; }
+body .blog-post-area .single-blog-post p { margin: 0 0 6px; text-align: left; }
+body .blog-post-area .single-blog-post .btn { margin-top: 14px; }
+
+/* --- Menu cột trái --- */
+body .left-sidebar .category-products { border: 0; margin: 0; padding: 0; }
+body .left-sidebar .panel,
+body .left-sidebar .panel-heading { background: transparent; border: 0; box-shadow: none; padding: 0; }
+body .left-sidebar .panel-title a {
+    display: block;
+    padding: 10px 14px;
+    background: var(--chip);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: none;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+}
+
+/* --- Ô nhập --- */
+body .blog-post-area > form label,
+body .signup-form label {
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+body .blog-post-area > form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="hidden"]),
+body .blog-post-area > form select,
+body .blog-post-area > form textarea,
+body .signup-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]),
+body .signup-form select {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14.5px;
+    padding: 0 14px;
+    margin-bottom: 14px;
+    box-shadow: none;
+}
+body .blog-post-area > form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="hidden"]),
+body .blog-post-area > form select,
+body .signup-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]),
+body .signup-form select { height: 44px; }
+body .blog-post-area > form textarea { padding: 12px 14px; }
+body .blog-post-area > form input[type="file"],
+body .signup-form input[type="file"] {
+    width: 100%;
+    background: #fff;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+}
+body .blog-post-area > form input:focus,
+body .blog-post-area > form select:focus,
+body .blog-post-area > form textarea:focus,
+body .signup-form input:focus,
+body .signup-form select:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(11, 122, 117, 0.16);
+}
+body .signup-form img { border-radius: 50%; object-fit: cover; border: 3px solid var(--chip); }
+
+/* --- Nút --- */
+body .blog-post-area .btn,
+body .signup-form button.btn,
+body .blog-post-area > form button,
+body .blog-post-area > form input[type="submit"] {
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 11px 26px;
+    margin-right: 8px;
+}
+body .signup-form button.btn,
+body .blog-post-area > form button[type="submit"]:not(.btn-danger):not(.btn-success):not(.btn-warning),
+body .blog-post-area > form input[type="submit"] {
+    background: var(--ink);
+    border: 0;
+    color: #fff;
+}
+body .signup-form button.btn:hover,
+body .blog-post-area > form button[type="submit"]:not(.btn-danger):not(.btn-success):not(.btn-warning):hover,
+body .blog-post-area > form input[type="submit"]:hover { background: var(--accent); }
+
+/* --- Bảng, thông báo, khu bình luận --- */
+body .blog-post-area table.table {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(20, 33, 61, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 16px 36px rgba(20, 33, 61, 0.16);
+}
+body .blog-post-area table.table > thead > tr > th {
+    background: var(--chip);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent);
+}
+body .blog-post-area .alert { border-radius: 8px; }
+body .blog-post-area .response-area .media { border-bottom: 1px solid var(--line); padding: 10px 0; }
+body .blog-post-area .response-area .media:last-child { border-bottom: 0; }
+
+/* ---------- Thông báo (login / register / forgot-password): tự ẩn sau 10 giây ---------- */
+body .login-msg,
+body .signup-msg,
+body .flash-msg {
+    overflow: hidden;
+    animation: flashHide 0.6s ease 10s forwards;
+}
+body .flash-msg {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--ink);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 14px;
+}
+body .flash-msg.error { border-left-color: #D64545; }
+@keyframes flashHide {
+    from { opacity: 1; max-height: 200px; }
+    to   { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; border-width: 0; }
+}
+body .reset-msg { overflow: hidden; animation: flashHide 0.6s ease 10s forwards; }

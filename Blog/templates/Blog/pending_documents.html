@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section>
+    <div class="container">
+        <div class="row">
+
+            <div class="col-sm-9">
+                <div class="blog-post-area">
+
+                    <h2 class="title text-center">
+                        Pending Documents
+                    </h2>
+
+                    {% if documents %}
+
+                    {% for document in documents %}
+
+                    <div class="single-blog-post">
+
+                        <h3>{{ document.title }}</h3>
+
+                        <div class="post-meta">
+                            <ul>
+                                <li>
+                                    <i class="fa fa-user"></i>
+                                    {{ document.uploaded_by.username }}
+                                </li>
+
+                                <li>
+                                    <i class="fa fa-clock-o"></i>
+                                    {{ document.created_at }}
+                                </li>
+                            </ul>
+                        </div>
+
+                        {% if document.description %}
+                        <p>
+                            <strong>Description:</strong>
+                            {{ document.description }}
+                        </p>
+                        {% endif %}
+
+                        {% if document.faculty %}
+                        <p>
+                            <strong>Faculty:</strong>
+                            {{ document.faculty.name }}
+                        </p>
+                        {% endif %}
+
+                        {% if document.course %}
+                        <p>
+                            <strong>Course:</strong>
+                            {{ document.course.name }}
+                        </p>
+                        {% endif %}
+
+                        {% if document.doc_type %}
+                        <p>
+                            <strong>Document Type:</strong>
+                            {{ document.get_doc_type_display }}
+                        </p>
+                        {% endif %}
+
+                        <p>
+                            <strong>Status:</strong>
+                            {{ document.get_status_display }}
+                        </p>
+
+                        {% if document.file %}
+                        <a href="{{ document.file.url }}" class="btn btn-primary" target="_blank">
+                            <i class="fa fa-file"></i>
+                            View Document
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'approve_document' document.id %}" class="btn btn-success">
+                            <i class="fa fa-check"></i>
+                            Approve
+                        </a>
+                        <a href="{% url 'reject_document' document.id %}" class="btn btn-danger">
+                            Reject
+                        </a>
+
+                    </div>
+
+                    {% endfor %}
+
+                    {% else %}
+
+                    <p class="text-center">
+                        No pending documents.
+                    </p>
+
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

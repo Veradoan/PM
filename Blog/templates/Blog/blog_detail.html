@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* Nền trang chi tiết tài liệu (đồng bộ với Home): ảnh University + lớp phủ sáng để chữ dễ đọc */
+    html body {
+        background-image:
+            linear-gradient(rgba(20, 33, 61, 0.55), rgba(20, 33, 61, 0.55)),
+            url("{% static 'global/images/University.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    /* Khung nội dung, tiêu đề, ô nhập: dùng chung trong theme.css */
+
+    /* ====== Khối đánh giá ngôi sao ====== */
+    /* Dùng ký tự sao Unicode (★ / ☆) thay cho icon font FontAwesome:
+       không phụ thuộc file font, hết cảnh icon hiện ô vuông khi máy thiếu font.
+       Các font hệ thống dưới đây đều có sẵn glyph sao (Win/macOS/Linux/mobile). */
+    .rating-box .avg-stars,
+    .rating-box .rate-input {
+        font-family: 'Segoe UI Symbol', 'Apple Symbols', 'Noto Sans Symbols 2', 'DejaVu Sans', sans-serif;
+        line-height: 1;
+    }
+    .rating-box {
+        padding: 10px 12px;
+        margin: 10px 0 15px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 6px;
+        display: inline-block;
+    }
+    .rating-box .avg-stars,
+    .rating-box .rate-input {
+        color: #f39c12; /* vàng đồng bộ theme */
+        font-size: 20px;
+    }
+    .rating-box .avg-stars .star-o {
+        color: #bdc3c7;
+    }
+    /* Nửa sao: ngôi sao đầy ★ đặt đè lên sao rỗng ☆, chỉ hiện nửa rộng */
+    .rating-box .half-star {
+        position: relative;
+        display: inline-block;
+    }
+    .rating-box .half-star .on {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 50%;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .rating-box #avg-text,
+    .rating-box .rate-count {
+        font-weight: bold;
+        color: #c89805;
+        margin-left: 6px;
+    }
+    .rating-box .rate-count {
+        font-weight: normal;
+        color: #888;
+        font-size: 12px;
+    }
+    .rating-box .rate-input .rate-star {
+        cursor: pointer;
+        color: #bdc3c7;
+        margin-right: 2px;
+        transition: color .15s ease;
+    }
+    /* Sao đã vote của user */
+    .rating-box .rate-input .rate-star.voted {
+        color: #f39c12;
+    }
+    /* Hover: tô vàng sao đang hover + các sao bên trái nó */
+    .rating-box .rate-input .rate-star.hover {
+        color: #f39c12;
+    }
+    .rating-box .rate-msg {
+        display: inline-block;
+        margin-left: 10px;
+        font-size: 13px;
+        min-height: 18px;
+    }
+    .rating-box .rate-msg.success {
+        color: #27ae60;
+    }
+    .rating-box .rate-msg.error {
+        color: #e74c3c;
+    }
+    /* ====== Khối bình luận (comment) ====== */
+    .response-area .media {
+        margin-top: 20px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 6px;
+    }
+    .comment-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+        border: 1px solid #e0e4e8;
+    }
+    .comment-child {
+        margin-top: 10px;
+        background: rgba(244, 246, 250, 0.95);
+    }
+    .comment-time {
+        font-weight: normal;
+        font-size: 12px;
+        color: #999;
+    }
+    .reply-btn {
+        border: none;
+        background: none;
+        color: #2a73cc;
+        padding: 0;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    .reply-btn:hover {
+        text-decoration: underline;
+    }
+    #comment-form {
+        margin-bottom: 15px;
+    }
+    #comment-form textarea,
+    .reply-form textarea {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    .comment-msg {
+        margin-left: 10px;
+        font-size: 13px;
+    }
+    .comment-msg.success {
+        color: #27ae60;
+    }
+    .comment-msg.error {
+        color: #e74c3c;
+    }
+    .reply-cancel {
+        border: none;
+        background: none;
+        color: #888;
+        margin-left: 8px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+</style>
+
+<section>
+	<div class="container">
+		<div class="row">
+
+			<div class="col-sm-9">
+				<div class="blog-post-area">
+
+					<!-- Document title -->
+					<h2 class="title text-center">
+						{{ document.title }}
+					</h2>
+
+					<!-- Document information -->
+					<div class="single-blog-post">
+
+						<div class="post-meta">
+							<ul>
+								<li>
+									<i class="fa fa-user"></i>
+									{{ document.uploaded_by.username }}
+								</li>
+
+								<li>
+									<i class="fa fa-clock-o"></i>
+									{{ document.created_at }}
+								</li>
+							</ul>
+						</div>
+
+						<!-- Description -->
+						{% if document.description %}
+						<p>
+							{{ document.description }}
+						</p>
+						{% endif %}
+
+						<!-- Faculty -->
+						{% if document.faculty %}
+						<p>
+							<strong>Faculty:</strong>
+							{{ document.faculty.name }}
+						</p>
+						{% endif %}
+
+						<!-- Course -->
+						{% if document.course %}
+						<p>
+							<strong>Course:</strong>
+							{{ document.course.name }}
+						</p>
+						{% endif %}
+
+						<!-- Document type -->
+						{% if document.doc_type %}
+						<p>
+							<strong>Document Type:</strong>
+							{{ document.get_doc_type_display }}
+						</p>
+						{% endif %}
+
+						<!-- Rating: ngôi sao TBC + ngôi sao click đánh giá (AJAX) -->
+						<div class="rating-box">
+							<strong>Rating:</strong>
+
+							<!-- Ngôi sao hiển thị TBC (read-only, render sẵn theo server) -->
+							<span class="avg-stars" id="avg-stars">
+								{% for i in '12345' %}
+									{% if forloop.counter <= avg_full %}
+										★
+									{% elif avg_half and forloop.counter == avg_full|add:1 %}
+										<span class="half-star"><span class="star-o">☆</span><span class="on">★</span></span>
+									{% else %}
+										<span class="star-o">☆</span>
+									{% endif %}
+								{% endfor %}
+							</span>
+
+							<span id="avg-text">{{ avg|floatformat:1 }} / 5</span>
+							<span class="rate-count" id="rate-count">({{ rate_count }} lượt đánh giá)</span>
+
+							<br>
+
+							<!-- 5 ngôi sao để click đánh giá -->
+							<span class="rate-input" id="rate-input" data-document-id="{{ document.id }}">
+								{% for i in '12345' %}
+									<span class="rate-star{% if forloop.counter <= user_rate %} voted{% endif %}"
+										data-rate="{{ forloop.counter }}"
+										title="{{ forloop.counter }} sao">★</span>
+								{% endfor %}
+							</span>
+
+							<span class="rate-msg" id="rate-msg"></span>
+						</div>
+
+						<!-- AI Summary -->
+						{% if document.ai_summary %}
+						<div class="alert alert-info">
+							<h4>AI Summary</h4>
+							<p>{{ document.ai_summary }}</p>
+						</div>
+						{% endif %}
+						<!-- File -->
+						{% if document.file %}
+
+						<!-- PDF Preview -->
+						{% if document.file.name|lower|slice:"-4:" == ".pdf" %}
+						<div style="margin-top: 30px;">
+
+							<h3>Document Preview</h3>
+
+							<object data="{% url 'preview_document' document.id %}" type="application/pdf" width="100%"
+								height="600px" style="border: 1px solid #ddd;">
+
+								<p>
+									Your browser does not support PDF preview.
+									<a href="{% url 'preview_document' document.id %}" target="_blank">
+										Open PDF
+									</a>
+								</p>
+
+							</object>
+
+						</div>
+						{% endif %}
+
+						<!-- Download + Report -->
+						<div class="text-center" style="margin-top: 20px;">
+
+							<a href="{% url 'download_document' document.id %}" class="btn btn-primary">
+
+								<i class="fa fa-download"></i>
+								Download Document
+
+							</a>
+
+							{% if user.is_authenticated %}
+							<a href="{% url 'report_document' document.id %}" class="btn btn-danger">
+
+								<i class="fa fa-flag"></i>
+								Report Document
+
+							</a>
+							{% endif %}
+
+
+						</div>
+
+					</div>
+
+
+
+			{% else %}
+
+			<p class="text-center">
+				Document file is not available.
+			</p>
+
+			{% endif %}
+
+					
+<!-- Comments -->
+					<div class="response-area">
+						<h2 class="bold">
+							Comments
+						</h2>
+
+						<!-- Form gửi bình luận (AJAX qua router save_comment trong action).
+							Chưa login: JS chặn tại chỗ và hiện thông báo, không gửi request -->
+						<form id="comment-form"
+							action="{% url 'save_comment' %}"
+							method="post"
+							data-logged-in="{% if request.user.is_authenticated %}1{% else %}0{% endif %}"
+							data-login-url="{% url 'login' %}">
+							{% csrf_token %}
+							<input type="hidden" name="document_id" value="{{ document.id }}">
+							<textarea name="comment" rows="3" class="form-control"
+								placeholder="Viết bình luận của bạn..."></textarea>
+							<button type="submit" class="btn btn-primary btn-sm">Gửi bình luận</button>
+							<span class="comment-msg" id="comment-msg"></span>
+						</form>
+
+						<!-- Danh sách bình luận (render sẵn từ server):
+							comment cha + các comment con (reply) xếp ngay dưới cha -->
+						<div id="comment-list">
+							{% for item in comment_threads %}
+							<div class="media comment-item">
+								{% if item.parent.user.avatar %}
+								<img class="comment-avatar pull-left" src="{{ item.parent.user.avatar.url }}" alt="avatar">
+								{% else %}
+								<img class="comment-avatar pull-left" src="{% static 'global/images/avatar-default.png' %}" alt="avatar">
+								{% endif %}
+								<div class="media-body">
+									<h4 class="media-heading">
+										{{ item.parent.user.username }}
+										<small class="comment-time">{{ item.parent.created_at|date:"H:i d/m/Y" }}</small>
+									</h4>
+
+									<p>
+										{{ item.parent.comment }}
+									</p>
+
+									<button type="button" class="reply-btn"
+										data-parent-id="{{ item.parent.id }}">Trả lời</button>
+
+									<!-- Comment con (reply) hiển thị bên dưới comment cha -->
+									<div class="comment-replies" id="replies-{{ item.parent.id }}">
+										{% for r in item.replies %}
+										<div class="media comment-item comment-child">
+											{% if r.user.avatar %}
+											<img class="comment-avatar pull-left" src="{{ r.user.avatar.url }}" alt="avatar">
+											{% else %}
+											<img class="comment-avatar pull-left" src="{% static 'global/images/avatar-default.png' %}" alt="avatar">
+											{% endif %}
+											<div class="media-body">
+												<h4 class="media-heading">
+													{{ r.user.username }}
+													<small class="comment-time">{{ r.created_at|date:"H:i d/m/Y" }}</small>
+												</h4>
+
+												<p>
+													{{ r.comment }}
+												</p>
+											</div>
+										</div>
+										{% endfor %}
+									</div>
+
+									<!-- Slot chứa form trả lời (JS tạo khi bấm Trả lời) -->
+									<div class="reply-slot" id="reply-slot-{{ item.parent.id }}"></div>
+								</div>
+							</div>
+							{% empty %}
+							<p id="no-comment">
+								No comments yet.
+							</p>
+							{% endfor %}
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+</section>
+
+{% endblock %}
+
+{% block rate %}
+<script>
+$(document).ready(function () {
+    // ===== Đánh giá tài liệu bằng AJAX (không reload trang) =====
+    var $rateInput = $('#rate-input');
+    if (!$rateInput.length) return;
+
+    var documentId = $rateInput.data('document-id');
+    var rateUrl = '{% url "save_rating" %}';
+    var $stars = $rateInput.find('.rate-star');
+    var $msg = $('#rate-msg');
+    var hasVoted = $stars.filter('.voted').length > 0;
+    var busy = false; // chống click liên tục khi request đang chạy
+
+    // Lấy CSRF token từ cookie (Django)
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = $.trim(cookies[i]);
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function setMsg(text, type) {
+        $msg.attr('class', 'rate-msg ' + (type || ''));
+        $msg.text(text);
+    }
+
+    // Vẽ lại dãy sao TBC (hỗ trợ nửa sao) theo giá trị avg
+    function renderAvgStars(avg) {
+        var full = Math.floor(avg);
+        var frac = avg - full;
+        var half = (frac >= 0.75) ? 0 : ((frac >= 0.25) ? 1 : 0);
+        if (frac >= 0.75) full += 1;
+
+        var html = '';
+        for (var i = 1; i <= 5; i++) {
+            if (i <= full) {
+                html += '<span>★</span>';
+            } else if (half && i === full + 1) {
+                html += '<span class="half-star"><span class="star-o">☆</span><span class="on">★</span></span>';
+            } else {
+                html += '<span class="star-o">☆</span>';
+            }
+        }
+        $('#avg-stars').html(html);
+    }
+
+    // Vẽ lại các sao user đã chọn
+    function renderUserStars(score) {
+        $stars.each(function () {
+            var $s = $(this);
+            if (parseInt($s.data('rate'), 10) <= score) {
+                $s.addClass('voted');
+            } else {
+                $s.removeClass('voted');
+            }
+        });
+    }
+
+    // Hover: tô vàng sao đang hover + các sao bên trái
+    $stars.on('mouseenter', function () {
+        var score = parseInt($(this).data('rate'), 10);
+        $stars.each(function () {
+            var s = parseInt($(this).data('rate'), 10);
+            $(this).toggleClass('hover', s <= score);
+        });
+    });
+
+    $rateInput.on('mouseleave', function () {
+        $stars.removeClass('hover');
+    });
+
+    // Click sao -> gửi AJAX
+    $stars.on('click', function () {
+        if (busy) return;
+
+        var score = parseInt($(this).data('rate'), 10);
+
+        $.ajax({
+            url: rateUrl,
+            method: 'POST',
+            data: {
+                'document_id': documentId,
+                'rate': score,
+                'csrfmiddlewaretoken': getCookie('csrftoken')
+            },
+            dataType: 'json',
+            beforeSend: function () {
+                busy = true;
+                setMsg('Đang gửi đánh giá...', '');
+            },
+            success: function (data) {
+                if (data.success) {
+                    // saved_rate = điểm thật sự được lưu
+                    // (nếu user đã rate trước đó thì là điểm cũ, giữ nguyên)
+                    renderUserStars(data.saved_rate);
+                    renderAvgStars(data.avg);
+                    $('#avg-text').text(data.avg + ' / 5');
+                    $('#rate-count').text('(' + data.rate_count + ' lượt đánh giá)');
+                    setMsg(data.message, 'success');
+                } else {
+                    // Chưa login hoặc lỗi -> hiện thông báo, KHÔNG reload trang
+                    setMsg(data.error, 'error');
+                }
+            },
+            error: function (xhr) {
+                // Server trả JSON lỗi ở status != 200 vẫn vào đây
+                var data = xhr.responseJSON;
+                setMsg(data && data.error ? data.error : 'Có lỗi xảy ra, vui lòng thử lại.', 'error');
+            },
+            complete: function () {
+                busy = false;
+            }
+        });
+    });
+});
+
+    $(document).ready(function () {
+        // ===== Bình luận: AJAX, chưa login chặn tại chỗ =====
+        var $cmtForm = $('#comment-form');
+        if (!$cmtForm.length) return;
+
+        var cmtUrl = $cmtForm.attr('action'); // router save_comment trong action của form
+        var isLoggedIn = $cmtForm.data('logged-in') == 1; // server render trạng thái login
+        var cmtDocumentId = $cmtForm.find('input[name="document_id"]').val();
+        var $cmtText = $cmtForm.find('textarea[name="comment"]');
+        var $cmtMsg = $('#comment-msg');
+        var $cmtList = $('#comment-list');
+
+        // Lấy CSRF token từ cookie (Django) - giống phần rating
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = $.trim(cookies[i]);
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function setCmtMsg($el, text, type) {
+            $el.attr('class', 'comment-msg ' + (type || ''));
+            $el.text(text);
+        }
+
+        // Chưa login: thông báo tại chỗ kèm link vào trang đăng nhập
+        function showLoginMsg($msgEl) {
+            $msgEl.attr('class', 'comment-msg error');
+            $msgEl.text('Vui lòng đăng nhập để bình luận. ');
+            $msgEl.append($('<a>').attr('href', $cmtForm.data('login-url')).text('Đăng nhập'));
+        }
+
+        // Dựng 1 node bình luận (dùng chung cho comment cha và comment con)
+        function buildCommentNode(data, isChild) {
+            var avatar = $('<img class="comment-avatar pull-left">')
+                .attr('src', data.avatar).attr('alt', 'avatar');
+            var heading = $('<h4 class="media-heading">')
+                .text(data.author_name)
+                .append($('<small class="comment-time">').text(' ' + data.created_at));
+            var body = $('<div class="media-body">')
+                .append(heading)
+                .append($('<p>').text(data.comment));
+
+            var item = $('<div class="media comment-item">').attr('data-comment-id', data.id);
+            if (isChild) {
+                item.addClass('comment-child');
+            } else {
+                // Comment cha có nút Trả lời + chỗ chứa reply + slot form reply
+                body.append($('<button type="button" class="reply-btn">')
+                    .text('Trả lời').attr('data-parent-id', data.id));
+                body.append($('<div class="comment-replies">').attr('id', 'replies-' + data.id));
+                body.append($('<div class="reply-slot">').attr('id', 'reply-slot-' + data.id));
+            }
+            return item.append(avatar).append(body);
+        }
+
+        // Gửi bình luận mới (cha hoặc con) lên server
+        function submitComment($msgEl, text, parentId, onDone) {
+            if (!isLoggedIn) {
+                showLoginMsg($msgEl);
+                return;
+            }
+            if (!text) {
+                setCmtMsg($msgEl, 'Nội dung bình luận không được để trống.', 'error');
+                return;
+            }
+
+            var payload = {
+                'document_id': cmtDocumentId,
+                'comment': text,
+                'csrfmiddlewaretoken': getCookie('csrftoken')
+            };
+            if (parentId) payload['parent_id'] = parentId;
+
+            $.post(cmtUrl, payload)
+                .done(function (resp) {
+                    if (resp.success) {
+                        onDone(resp.data);
+                    } else {
+                        setCmtMsg($msgEl, resp.error, 'error');
+                    }
+                })
+                .fail(function () {
+                    setCmtMsg($msgEl, 'Không gửi được bình luận, vui lòng thử lại.', 'error');
+                });
+        }
+
+        // Gửi bình luận cha -> chèn lên đầu danh sách (danh sách xếp mới nhất trước)
+        $cmtForm.on('submit', function (e) {
+            e.preventDefault();
+            submitComment($cmtMsg, $.trim($cmtText.val()), null, function (data) {
+                $('#no-comment').remove();
+                $cmtList.prepend(buildCommentNode(data, false));
+                $cmtText.val('');
+                setCmtMsg($cmtMsg, 'Bình luận đã được gửi!', 'success');
+            });
+        });
+
+        // Nút Trả lời (delegate: áp dụng cho cả comment thêm động)
+        // -> mở form reply dưới comment cha; gửi xong chèn comment con ngay dưới cha
+        $cmtList.on('click', '.reply-btn', function () {
+            var parentId = $(this).data('parent-id');
+            var $slot = $('#reply-slot-' + parentId);
+            var wasOpen = $slot.children().length > 0;
+            $cmtList.find('.reply-slot').empty(); // mỗi lần chỉ mở 1 form reply
+            if (wasOpen) return; // bấm lần nữa -> đóng form
+
+            var $rText = $('<textarea class="form-control" rows="2">')
+                .attr('placeholder', 'Trả lời bình luận này...');
+            var $rMsg = $('<span class="comment-msg">');
+            var $rForm = $('<form class="reply-form">')
+                .append($rText)
+                .append($('<button type="submit" class="btn btn-primary btn-sm">').text('Gửi'))
+                .append($('<button type="button" class="reply-cancel">').text('Hủy'))
+                .append($rMsg);
+            $slot.append($rForm);
+            $rText.focus();
+
+            $rForm.find('.reply-cancel').on('click', function () {
+                $slot.empty();
+            });
+
+            $rForm.on('submit', function (e) {
+                e.preventDefault();
+                submitComment($rMsg, $.trim($rText.val()), parentId, function (data) {
+                    $('#replies-' + parentId).append(buildCommentNode(data, true));
+                    $slot.empty();
+                    setCmtMsg($cmtMsg, 'Phản hồi đã được gửi!', 'success');
+                });
+            });
+        });
+    });
+
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Hoạt Động Của Tôi</h2>
+    <hr>
+    
+    {% if logs %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Hành động</th>
+                        <th>Đối tượng</th>
+                        <th>Ghi chú / Lý do</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if log.action == 'approve' %}
+                                <span class="badge bg-success">Duyệt tài liệu</span>
+                            {% elif log.action == 'reject' %}
+                                <span class="badge bg-danger">Từ chối tài liệu</span>
+                            {% elif log.action == 'resolve_report' %}
+                                <span class="badge bg-primary">Xử lý báo cáo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if log.document %}
+                                {{ log.document.title }}
+                            {% elif log.report %}
+                                Báo cáo #{{ log.report.id }}
+                            {% else %}
+                                <i>Đã bị xóa</i>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.reason|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">Bạn chưa thực hiện hoạt động kiểm duyệt nào.</div>
+    {% endif %}
+</div>
+{% endblock %}

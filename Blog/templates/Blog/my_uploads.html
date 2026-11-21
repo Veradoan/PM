@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* Nền trang My Uploads (đồng bộ với Home): ảnh University + lớp phủ sáng để chữ dễ đọc */
+    html body {
+        background-image:
+            linear-gradient(rgba(20, 33, 61, 0.55), rgba(20, 33, 61, 0.55)),
+            url("{% static 'global/images/Book8.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    /* Khung nội dung, tiêu đề, ô nhập: dùng chung trong theme.css */
+</style>
+
+<section>
+    <div class="container">
+        <div class="row">
+
+            <div class="col-sm-9">
+                <div class="blog-post-area">
+
+                    <h2 class="title text-center">Announcement</h2>
+
+                    {% for document in documents %}
+
+                    <div class="single-blog-post"
+                         style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px;">
+
+                        <h3>{{ document.title }}</h3>
+
+                        <p>
+                            <strong>Status:</strong>
+
+                            {% if document.status == 'approved' %}
+                                <span class="label label-success">
+                                    Approved
+                                </span>
+
+                            {% elif document.status == 'rejected' %}
+                                <span class="label label-danger">
+                                    Rejected
+                                </span>
+
+                            {% else %}
+                                <span class="label label-warning">
+                                    Pending
+                                </span>
+                            {% endif %}
+                        </p>
+
+                        <p>
+                            <strong>Uploaded:</strong>
+                            {{ document.created_at }}
+                        </p>
+
+                        {% if document.review_note %}
+                            <div class="alert alert-danger">
+                                <strong>Moderator Feedback:</strong>
+                                <p>{{ document.review_note }}</p>
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                    {% empty %}
+
+                    <div class="alert alert-info">
+                        You have not uploaded any documents yet.
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
