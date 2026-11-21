@@ -1,0 +1,135 @@
+{% load static %}
+
+<header id="header"><!--header-->
+    <div class="header_top"><!--header_top-->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="contactinfo">
+                        <ul class="nav nav-pills">
+                            <li><a href="#"><i class="fa fa-phone"></i> +2 95 01 88 821</a></li>
+                            <li><a href="#"><i class="fa fa-envelope"></i> info@academicshare.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--/header_top-->
+
+    <div class="header-bottom"><!--header-bottom-->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-9">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse"
+                            data-target=".navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+                    <a class="brand-name pull-left" href="{% url 'document_list' %}">Academic<span>Share</span></a>
+
+                    <div class="mainmenu pull-left">
+                        <ul class="nav navbar-nav collapse navbar-collapse">
+                            <li><a href="{% url 'document_list' %}"><i class="fa fa-home"></i> Home</a></li>
+
+                            <li>
+                                <a href="{% url 'search' %}"><i class="fa fa-search"></i> Search</a>
+                            </li>
+
+                            <!-- CÁC CHỨC NĂNG DÀNH CHO USER ĐÃ ĐĂNG NHẬP -->
+                            {% if user.is_authenticated %}
+                            <li>
+                                <a href="{% url 'upload_document' %}"><i class="fa fa-upload"></i> Upload</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'my_uploads' %}"><i class="fa fa-bell"></i> Announcement</a>
+                            </li>
+
+                            <!-- Nút Công cụ Kiểm duyệt (CHỈ hiển thị cho Moderator/Admin) -->
+                            {% if request.user.role == 'moderator' or request.user.role == 'admin' %}
+                            <li class="dropdown">
+                                <a href="#" style="color: #e74c3c; font-weight: bold;">
+                                    <i class="fa fa-shield"></i> Moderation Tools<i class="fa fa-angle-down"></i>
+                                </a>
+                                <ul role="menu" class="sub-menu">
+                                    <!-- Đã thêm lại nút Workspace -->
+                                    <li><a href="{% url 'moderator_dashboard' %}">Workspace (Thống kê)</a></li>
+                                   
+                                </ul>
+                            </li>
+                            {% endif %}
+                            {% endif %}
+
+                            <li><a href="contact-us.html"><i class="fa fa-envelope"></i> Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="shop-menu clearfix pull-right">
+                        <ul class="nav navbar-nav">
+                            {% if user.is_authenticated %}
+                            <!-- Hiển thị tên user thay vì chữ Account chung chung -->
+                            <li><a href="{% url 'account' %}"><i class="fa fa-user"></i> {{ user.username }}</a></li>
+                            <li>
+                                <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Logout</a>
+                            </li>
+                            {% else %}
+                            <li>
+                                <a href="{% url 'login' %}"><i class="fa fa-lock"></i> Login</a>
+                            </li>
+                            <!-- Nên có thêm nút Register cho người chưa có tài khoản -->
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--/header-bottom-->
+</header><!--/header-->
+<style>
+    .search-row {
+        display: flex;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .search-row input,
+    .search-row select {
+        height: 45px;
+        border: 1px solid #ddd;
+        padding: 0 12px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+
+    .search-row input {
+        width: 25%;
+    }
+
+    .search-row select {
+        width: 18.75%;
+    }
+
+    .search-btn {
+        background: #fda12b;
+        color: white;
+        border: none;
+        border-radius: 0;
+        padding: 10px 30px;
+        margin-bottom: 15px;
+    }
+
+    .search-btn:hover {
+        background: #fda12b;
+        color: white;
+    }
+</style>
+
+
+{% block scripts %}
+
+{% endblock %}

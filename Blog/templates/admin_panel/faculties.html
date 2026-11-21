@@ -1,0 +1,146 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Quản lý Khoa - AcademicShare{% endblock %}
+
+{% block content %}
+<div class="saas-card">
+    <div class="p-3 d-flex justify-content-between align-items-center border-bottom flex-wrap gap-2">
+        <div>
+            <h5 class="m-0 fw-bold"><i class="fa-solid fa-building-columns me-2 text-primary"></i>Quản lý Khoa</h5>
+            <small class="text-muted">Thêm, sửa, xóa các khoa trong hệ thống.</small>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addFacultyModal">
+            <i class="fas fa-plus"></i> Thêm Khoa
+        </button>
+    </div>
+
+    <div class="p-3">
+        <form method="GET" class="row g-2 mb-3">
+            <div class="col-md-8">
+                <input type="text" name="search" class="form-control"
+                       placeholder="Tìm theo tên khoa..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-dark w-100"><i class="fas fa-search"></i> Tìm</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url 'admin_faculties' %}" class="btn btn-outline-secondary w-100">Xóa lọc</a>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Tên Khoa</th>
+                        <th class="text-center">Số Môn Học</th>
+                        <th class="text-center">Số Tài Liệu</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in faculties %}
+                    <tr>
+                        <td>{{ f.id }}</td>
+                        <td><strong>{{ f.name }}</strong></td>
+                        <td class="text-center">
+                            <span class="badge bg-info text-dark">{{ f.course_count|default:0 }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-success">{{ f.doc_count|default:0 }}</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal" data-bs-target="#editFacultyModal"
+                                        data-id="{{ f.id }}" data-name="{{ f.name }}">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <form action="{% url 'admin_faculties' %}" method="POST"
+                                      onsubmit="return confirm('Xóa khoa &quot;{{ f.name }}&quot;? Tất cả môn học và tài liệu liên quan cũng sẽ bị ảnh hưởng.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="faculty_id" value="{{ f.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fa-solid fa-folder-open d-block mb-2"></i>
+                            Chưa có khoa nào trong hệ thống.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Khoa -->
+<div class="modal fade" id="addFacultyModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-plus me-2"></i>Thêm Khoa mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'admin_faculties' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label">Tên Khoa <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="name" required placeholder="VD: Khoa Công nghệ Thông tin">
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Thêm Khoa</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Sửa Khoa -->
+<div class="modal fade" id="editFacultyModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-pen me-2"></i>Chỉnh sửa Khoa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'admin_faculties' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="edit">
+          <input type="hidden" name="faculty_id" id="editFacultyId">
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label">Tên Khoa <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="name" id="editFacultyName" required>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu thay đổi</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.getElementById('editFacultyModal')?.addEventListener('show.bs.modal', function (event) {
+        const btn = event.relatedTarget;
+        document.getElementById('editFacultyId').value = btn.getAttribute('data-id');
+        document.getElementById('editFacultyName').value = btn.getAttribute('data-name');
+    });
+</script>
+{% endblock %}

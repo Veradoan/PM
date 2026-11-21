@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section>
+    <div class="container">
+
+        <div class="row">
+            <div class="col-sm-9">
+
+                <div class="blog-post-area">
+
+                    <h2 class="title text-center">
+                        User Management
+                    </h2>
+
+                    <table class="table table-bordered">
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for user_item in users %}
+
+                            <tr>
+
+                                <td>
+                                    {{ user_item.id }}
+                                </td>
+
+                                <td>
+                                    {{ user_item.username }}
+                                </td>
+
+                                <td>
+                                    {{ user_item.email }}
+                                </td>
+
+                                <td>
+                                    {{ user_item.get_role_display }}
+                                </td>
+
+                                <td>
+                                    <a href="{% url 'change_user_role' user_item.id %}"
+                                       class="btn btn-primary btn-sm">
+                                        Change Role
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    No users found.
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

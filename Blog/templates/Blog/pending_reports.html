@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Báo Cáo Tài Liệu Chờ Xử Lý</h2>
+    <hr>
+
+    <!-- Hiển thị message nếu có -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if reports %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Tài liệu bị báo cáo</th>
+                    <th>Người báo cáo</th>
+                    <th>Lý do</th>
+                    <th>Ngày báo cáo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td><a href="{% url 'document_detail' report.document.id %}">{{ report.document.title }}</a></td>
+                    <td>{{ report.user.username }}</td>
+                    <td>{{ report.description|truncatewords:20 }}</td>
+                    <td>{{ report.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <!-- FORM ĐÁNH DẤU ĐÃ XỬ LÝ (Gửi POST) -->
+                        <form action="{% url 'resolve_report' report.id %}" method="POST" style="display:inline;"
+                            onsubmit="return confirm('Bạn xác nhận đã xử lý xong báo cáo này?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                Đánh dấu đã xử lý
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-success">Tuyệt vời! Không có báo cáo nào cần xử lý.</div>
+    {% endif %}
+</div>
+{% endblock %}

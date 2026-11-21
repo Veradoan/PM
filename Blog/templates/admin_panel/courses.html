@@ -1,0 +1,180 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Quản lý Môn học - AcademicShare{% endblock %}
+
+{% block content %}
+<div class="saas-card">
+    <div class="p-3 d-flex justify-content-between align-items-center border-bottom flex-wrap gap-2">
+        <div>
+            <h5 class="m-0 fw-bold"><i class="fa-solid fa-book me-2 text-primary"></i>Quản lý Môn học</h5>
+            <small class="text-muted">Thêm, sửa, xóa môn học theo từng khoa.</small>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+            <i class="fas fa-plus"></i> Thêm Môn học
+        </button>
+    </div>
+
+    <div class="p-3">
+        <form method="GET" class="row g-2 mb-3">
+            <div class="col-md-5">
+                <input type="text" name="search" class="form-control"
+                       placeholder="Tìm theo tên môn học..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-4">
+                <select name="faculty" class="form-select">
+                    <option value="">-- Tất cả khoa --</option>
+                    {% for f in faculties %}
+                    <option value="{{ f.id }}" {% if faculty_filter == f.id|stringformat:"s" %}selected{% endif %}>{{ f.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-dark w-100"><i class="fas fa-filter"></i> Lọc</button>
+            </div>
+            <div class="col-md-1">
+                <a href="{% url 'admin_courses' %}" class="btn btn-outline-secondary w-100" title="Xóa lọc">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Tên Môn học</th>
+                        <th>Khoa</th>
+                        <th class="text-center">Số Tài Liệu</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in courses %}
+                    <tr>
+                        <td>{{ c.id }}</td>
+                        <td><strong>{{ c.name }}</strong></td>
+                        <td>
+                            {% if c.faculty %}
+                            <span class="badge bg-info text-dark">{{ c.faculty.name }}</span>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center"><span class="badge bg-success">{{ c.doc_count|default:0 }}</span></td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal" data-bs-target="#editCourseModal"
+                                        data-id="{{ c.id }}" data-name="{{ c.name }}"
+                                        data-faculty="{{ c.faculty.id }}">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <form action="{% url 'admin_courses' %}" method="POST"
+                                      onsubmit="return confirm('Xóa môn học &quot;{{ c.name }}&quot;?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="course_id" value="{{ c.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fa-solid fa-folder-open d-block mb-2"></i>
+                            Chưa có môn học nào phù hợp.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Môn học -->
+<div class="modal fade" id="addCourseModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-plus me-2"></i>Thêm Môn học mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'admin_courses' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label">Tên Môn học <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="name" required placeholder="VD: Lập trình Web">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">Thuộc Khoa <span class="text-danger">*</span></label>
+                  <select class="form-select" name="faculty_id" required>
+                      <option value="">-- Chọn khoa --</option>
+                      {% for f in faculties %}
+                      <option value="{{ f.id }}">{{ f.name }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Thêm Môn học</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Sửa Môn học -->
+<div class="modal fade" id="editCourseModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-pen me-2"></i>Chỉnh sửa Môn học</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'admin_courses' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="edit">
+          <input type="hidden" name="course_id" id="editCourseId">
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label">Tên Môn học <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="name" id="editCourseName" required>
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">Thuộc Khoa <span class="text-danger">*</span></label>
+                  <select class="form-select" name="faculty_id" id="editCourseFaculty" required>
+                      <option value="">-- Chọn khoa --</option>
+                      {% for f in faculties %}
+                      <option value="{{ f.id }}">{{ f.name }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu thay đổi</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.getElementById('editCourseModal')?.addEventListener('show.bs.modal', function (event) {
+        const btn = event.relatedTarget;
+        document.getElementById('editCourseId').value = btn.getAttribute('data-id');
+        document.getElementById('editCourseName').value = btn.getAttribute('data-name');
+        const facultyId = btn.getAttribute('data-faculty');
+        const select = document.getElementById('editCourseFaculty');
+        if (facultyId && select) select.value = facultyId;
+    });
+</script>
+{% endblock %}

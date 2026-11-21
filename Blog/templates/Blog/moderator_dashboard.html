@@ -1,0 +1,155 @@
+{% extends 'base.html' %} <!-- Thay bằng tên file layout gốc của bạn nếu khác -->
+
+{% block content %}
+<style>
+    .mod-workspace {
+        margin-top: 40px;
+        margin-bottom: 60px;
+    }
+    .workspace-card {
+        border-radius: 12px;
+        padding: 25px 20px;
+        margin-bottom: 20px;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: #333;
+        display: block;
+        height: 100%;
+    }
+    .workspace-card:hover {
+        transform: translateY(-5px);
+        text-decoration: none;
+        color: #000;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+    .card-icon {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: #555;
+    }
+    /* Thêm màu sắc cho từng icon để nổi bật hơn */
+    .icon-blue { color: #1e90ff; }
+    .icon-orange { color: #ff9f43; }
+    .icon-pink { color: #ff4757; }
+    .icon-green { color: #2ed573; }
+    .icon-purple { color: #9b59b6; }
+    .icon-grey { color: #747d8c; }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .card-desc {
+        font-size: 14px;
+        color: #666;
+    }
+    /* Bảng màu Pastel lấy từ thiết kế */
+    .bg-blue { background-color: #f0f4ff; }
+    .bg-orange { background-color: #fff3e0; }
+    .bg-pink { background-color: #ffebee; }
+    .bg-green { background-color: #e8f5e9; }
+    .bg-purple { background-color: #f3e5f5; }
+    .bg-grey { background-color: #f5f5f5; }
+    
+    .stat-badge {
+        background: #ff4757;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+    .status-badge {
+        background: #fdd8d8;
+        color: #d32f2f;
+        padding: 2px 10px;
+        border-radius: 15px;
+        font-size: 11px;
+        font-weight: bold;
+        display: inline-block;
+        margin-top: 8px;
+    }
+</style>
+
+<div class="container mod-workspace">
+    <h2 style="font-weight: 700; margin-bottom: 5px;">Moderator Workspace</h2>
+    <p class="text-muted" style="margin-bottom: 30px;">Khu vực làm việc riêng và thống kê của Moderator</p>
+
+    <div class="row">
+        <!-- Dashboard Thống kê -->
+        <div class="col-md-6 col-sm-6 mb-4">
+            <div class="workspace-card bg-blue">
+                <i class="fas fa-chart-line card-icon icon-blue"></i>
+                <div class="card-title">Dashboard</div>
+                <div class="card-desc">
+                    <span style="font-size: 20px; font-weight: bold; color: #1e90ff;">{{ pending_docs_count }}</span> tài liệu chờ duyệt <br>
+                    <span style="font-size: 20px; font-weight: bold; color: #e84118;">{{ pending_reports_count }}</span> báo cáo chưa xử lý
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Review -->
+        <div class="col-md-6 col-sm-6 mb-4">
+            <a href="{% url 'pending_documents' %}" class="workspace-card bg-orange">
+                <i class="fas fa-file-signature card-icon icon-orange"></i>
+                <div class="card-title">
+                    Document Review
+                    {% if pending_docs_count > 0 %}
+                    <span class="stat-badge">{{ pending_docs_count }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-desc">Xem danh sách và duyệt tài liệu do sinh viên đăng tải.</div>
+            </a>
+        </div>
+
+        <!-- Reports -->
+        <div class="col-md-6 col-sm-6 mb-4">
+            <a href="{% url 'pending_reports' %}" class="workspace-card bg-pink">
+                <i class="fas fa-flag card-icon icon-pink"></i>
+                <div class="card-title">
+                    Reports
+                    {% if pending_reports_count > 0 %}
+                    <span class="stat-badge">{{ pending_reports_count }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-desc">Xử lý các báo cáo vi phạm nội dung từ cộng đồng.</div>
+            </a>
+        </div>
+
+        <!-- History -->
+        <div class="col-md-6 col-sm-6 mb-4">
+            <!-- Xóa style opacity, cursor not-allowed và thêm thẻ a với href -->
+            <a href="{% url 'moderation_history' %}" class="workspace-card bg-green">
+                <i class="fas fa-history card-icon"></i>
+                <div class="card-title">History</div>
+                <div class="card-desc">Xem lại lịch sử các quyết định kiểm duyệt của toàn hệ thống.</div>
+                <!-- Xóa thẻ span "Sắp ra mắt" -->
+            </a>
+        </div>
+
+        <!-- Comment Moderation -->
+        <div class="col-md-6 col-sm-6 mb-4">
+            <div class="workspace-card bg-purple" style="opacity: 0.7; cursor: not-allowed;">
+                <i class="fas fa-comments card-icon icon-purple"></i>
+                <div class="card-title">Comment Moderation</div>
+                <div class="card-desc">Quản lý và ẩn các bình luận tiêu cực, spam.</div>
+                <span class="status-badge">Giai đoạn sau</span>
+            </div>
+        </div>
+
+       <!-- My Activity -->
+        <div class="col-md-6 col-sm-6 mb-4">
+            <!-- Xóa style opacity, cursor not-allowed và thêm thẻ a với href -->
+            <a href="{% url 'my_activity' %}" class="workspace-card bg-grey">
+                <i class="fas fa-user card-icon"></i>
+                <div class="card-title">My Activity</div>
+                <div class="card-desc">Thống kê và xem lại các hoạt động cá nhân của bạn.</div>
+                <!-- Xóa thẻ span "Sắp ra mắt" -->
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login | AcademicShare{% endblock %}
+
+{% block content %}
+<style>
+    /* 1. Khóa cuộn trang và đặt ảnh nền thống nhất */
+    html, body {
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        background: url("{% static 'global/images/Book2.jpg' %}") no-repeat center center fixed !important;
+        background-size: cover !important;
+    }
+
+    /* 2. Header đồng bộ với các trang khác (dùng biến từ theme.css) */
+    body .header_top { background: var(--ink) !important; border-bottom: 0 !important; }
+    body .header_top .contactinfo ul li a { color: #C6D1E5 !important; }
+
+    /* 3. Thanh menu: nền sáng mờ, chữ tối rõ nét như trang chủ */
+    body #header .header-bottom {
+        background: rgba(255, 255, 255, 0.88) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--line) !important;
+    }
+    body header .shop-menu { background: transparent !important; backdrop-filter: none; }
+    body .shop-menu ul li a { color: var(--ink) !important; font-weight: 500; text-shadow: none; }
+    body .shop-menu ul li a:hover { color: var(--ink) !important; }
+
+    /* 4. Căn giữa khung form đăng nhập */
+    .login-wrapper {
+        height: calc(100vh - 120px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Hộp Login bán trong suốt (hiệu ứng kính mờ tương tự Register) */
+    .login-box {
+        background: rgba(20, 33, 61, 0.55) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 30px 40px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        width: 100%;
+        max-width: 480px;
+    }
+
+    .login-box h3 {
+        font-size: 34px; 
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 5px;
+        color: #ffffff !important;
+        font-family: var(--serif);
+        text-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    .login-box p.subtitle {
+        text-align: center;
+        color: #F1F5FA !important;
+        font-family: var(--sans);
+        text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        font-size: 14.5px;
+        margin-bottom: 25px;
+    }
+
+    /* 5. Căn chỉnh khung chứa input và icon chuẩn xác */
+    .input-group-custom {
+        position: relative;
+        margin-bottom: 15px;
+        width: 100%;
+    }
+
+    /* Icon SVG nhúng trực tiếp */
+    .input-group-custom .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        fill: #555;
+        z-index: 10;
+    }
+
+    .input-group-custom .form-control {
+        height: 48px;
+        padding-left: 45px !important;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.85);
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* Tùy chỉnh thêm cho phần ghi nhớ tài khoản hoặc quên mật khẩu nếu có */
+    .login-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        color: #fff;
+        font-family: var(--sans);
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        margin-bottom: 15px;
+    }
+
+    .login-options a {
+        color: #f8f8f7;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-options a:hover {
+        text-decoration: underline;
+    }
+
+    /* 6. Style cho dòng chữ chuyển hướng Register */
+    .register-redirect {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+        color: #fff;
+        font-family: var(--sans);
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .register-redirect a {
+        color: #ff9800;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .register-redirect a:hover {
+        text-decoration: underline;
+    }
+
+    .btn-login {
+        width: 100%;
+        height: 48px;
+        background-color: #ff9800;
+        border: none;
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-top: 5px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        cursor: pointer;
+    }
+
+    .btn-login:hover {
+        background-color: #e68a00;
+    }
+    .login-msg {
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--ink);
+        border-left: 4px solid var(--accent);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin-bottom: 14px;
+        font-size: 14px;
+    }
+    .login-msg.error { border-left-color: #D64545; }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-box">
+        <h3>Welcome Back!</h3>
+        <p class="subtitle">Login to your Academic account.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="login-msg {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Ô Username hoặc Email -->
+            <div class="input-group-custom">
+                <svg class="input-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <input type="text" name="username" class="form-control" placeholder="Username or Email" required>
+            </div>
+
+            <!-- Ô Password -->
+            <div class="input-group-custom">
+                <svg class="input-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+
+            <div class="login-options">
+                <label style="color: #fff; font-weight: normal; cursor: pointer;">
+                    <input type="checkbox" name="remember" style="margin-right: 5px;"> Remember me
+                </label>
+                <a href="{% url 'forgot_password' %}">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="btn-login">Login</button>
+
+            <!-- Dòng chuyển hướng sang trang Register -->
+            <div class="register-redirect">
+                Don't have an account? <a href="{% url 'register' %}">Register here</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

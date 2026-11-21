@@ -1,0 +1,52 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <h2>Lịch sử kiểm duyệt toàn hệ thống (History)</h2>
+    <a href="{% url 'moderator_dashboard' %}" class="btn btn-outline-secondary mb-3"><i class="fas fa-arrow-left"></i> Quay lại Workspace</a>
+    <hr>
+
+    {% if logs %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Người thực hiện</th>
+                    <th>Hành động</th>
+                    <th>Đối tượng</th>
+                    <th>Lý do/Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.created_at|date:"d/m/Y H:i:s" }}</td>
+                    <td>{{ log.moderator.username }}</td>
+                    <td>
+                        {% if log.action == 'approve' %}
+                            <span class="badge bg-success">Duyệt</span>
+                        {% elif log.action == 'reject' %}
+                            <span class="badge bg-danger">Từ chối</span>
+                        {% elif log.action == 'resolve_report' %}
+                            <span class="badge bg-primary">Xử lý báo cáo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.document %}
+                            Tài liệu: <a href="#">{{ log.document.title }}</a>
+                        {% elif log.report %}
+                            Báo cáo #{{ log.report.id }} (Tài liệu: {{ log.report.document.title }})
+                        {% endif %}
+                    </td>
+                    <td>{{ log.reason|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info">Chưa có lịch sử kiểm duyệt nào.</div>
+    {% endif %}
+</div>
+{% endblock %}

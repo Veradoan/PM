@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* Nền trang Search: ảnh study2 + lớp phủ navy cùng tông với trang Home */
+    html body {
+        background-image:
+            linear-gradient(rgba(20, 33, 61, 0.55), rgba(20, 33, 61, 0.55)),
+            url("{% static 'global/images/Book1.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    /* Khung nội dung, tiêu đề, ô nhập: dùng chung trong theme.css */
+</style>
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-9">
+
+                <div class="blog-post-area">
+
+                    <h2 class="title text-center">
+                        Search Academic Documents
+                    </h2>
+
+                    <!-- SEARCH FORM -->
+                    <form method="GET" action="{% url 'search' %}">
+
+                        <!-- Keyword -->
+                        <div style="margin-bottom: 15px;">
+                            <label>Keyword</label>
+
+                            <input
+                                type="text"
+                                name="name"
+                                value="{{ keyword }}"
+                                class="form-control"
+                                placeholder="Search by title or description..."
+                            >
+                        </div>
+
+
+                        <!-- Faculty -->
+                        <div style="margin-bottom: 15px;">
+                            <label>Faculty</label>
+
+                            <select
+                                name="faculty"
+                                id="faculty"
+                                class="form-control"
+                            >
+
+                                <option value="">
+                                    -- All Faculties --
+                                </option>
+
+                                {% for faculty in faculties %}
+
+                                    <option
+                                        value="{{ faculty.id }}"
+                                        {% if selected_faculty == faculty.id|stringformat:"s" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ faculty.name }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+                        </div>
+
+
+                        <!-- Course -->
+                        <div style="margin-bottom: 15px;">
+                            <label>Course</label>
+
+                            <select
+                                name="course"
+                                id="course"
+                                class="form-control"
+                            >
+
+                                <option value="">
+                                    -- All Courses --
+                                </option>
+
+                                {% for course in courses %}
+
+                                    <option
+                                        value="{{ course.id }}"
+                                        data-faculty="{{ course.faculty_id }}"
+                                        {% if selected_course == course.id|stringformat:"s" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ course.name }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+                        </div>
+
+
+                        <!-- Document Type -->
+                        <div style="margin-bottom: 20px;">
+                            <label>Document Type</label>
+
+                            <select
+                                name="doc_type"
+                                class="form-control"
+                            >
+
+                                <option value="">
+                                    -- All Document Types --
+                                </option>
+
+                                <option
+                                    value="exam"
+                                    {% if selected_doc_type == "exam" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Exam
+                                </option>
+
+                                <option
+                                    value="lecture_slide"
+                                    {% if selected_doc_type == "lecture_slide" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Lecture Slide
+                                </option>
+
+                                <option
+                                    value="sample_project"
+                                    {% if selected_doc_type == "sample_project" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Sample Project
+                                </option>
+
+                                <option
+                                    value="exercise"
+                                    {% if selected_doc_type == "exercise" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Exercise
+                                </option>
+
+                            </select>
+                        </div>
+
+
+                        <!-- Search button -->
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Search
+                        </button>
+
+                    </form>
+
+
+                    <hr>
+
+
+                    <!-- SEARCH RESULT -->
+
+                    {% if keyword or selected_faculty or selected_course or selected_doc_type %}
+
+                        <h3>
+                            Search Results
+                        </h3>
+
+                    {% endif %}
+
+
+                    {% for document in page_obj %}
+
+                        <div class="single-blog-post">
+
+                            <h3>
+                                {{ document.title }}
+                            </h3>
+
+                            <div class="post-meta">
+                                <ul>
+
+                                    <li>
+                                        <i class="fa fa-user"></i>
+                                        {{ document.uploaded_by.username }}
+                                    </li>
+
+                                    <li>
+                                        <i class="fa fa-clock-o"></i>
+                                        {{ document.created_at }}
+                                    </li>
+
+                                </ul>
+                            </div>
+
+
+                            {% if document.description %}
+
+                                <p>
+                                    {{ document.description }}
+                                </p>
+
+                            {% endif %}
+
+
+                            {% if document.faculty %}
+
+                                <p>
+                                    <strong>Faculty:</strong>
+                                    {{ document.faculty.name }}
+                                </p>
+
+                            {% endif %}
+
+
+                            {% if document.course %}
+
+                                <p>
+                                    <strong>Course:</strong>
+                                    {{ document.course.name }}
+                                </p>
+
+                            {% endif %}
+
+
+                            {% if document.doc_type %}
+
+                                <p>
+                                    <strong>Document Type:</strong>
+                                    {{ document.get_doc_type_display }}
+                                </p>
+
+                            {% endif %}
+
+
+                            <a
+                                href="{% url 'document_detail' document.id %}"
+                                class="btn btn-primary"
+                            >
+                                View Document
+                            </a>
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="text-center">
+
+                            <h3>
+                                No documents found.
+                            </h3>
+
+                            <p>
+                                Try another search.
+                            </p>
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    <!-- PAGINATION -->
+
+                    {% if page_obj.paginator.num_pages > 1 %}
+
+                        <div class="pagination-area">
+
+                            <ul class="pagination">
+
+                                {% if page_obj.has_previous %}
+
+                                    <li>
+                                        <a href="?name={{ keyword }}&faculty={{ selected_faculty }}&course={{ selected_course }}&doc_type={{ selected_doc_type }}&page={{ page_obj.previous_page_number }}">
+                                            Previous
+                                        </a>
+                                    </li>
+
+                                {% endif %}
+
+
+                                {% for num in page_obj.paginator.page_range %}
+
+                                    <li>
+                                        <a href="?name={{ keyword }}&faculty={{ selected_faculty }}&course={{ selected_course }}&doc_type={{ selected_doc_type }}&page={{ num }}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+
+                                {% endfor %}
+
+
+                                {% if page_obj.has_next %}
+
+                                    <li>
+                                        <a href="?name={{ keyword }}&faculty={{ selected_faculty }}&course={{ selected_course }}&doc_type={{ selected_doc_type }}&page={{ page_obj.next_page_number }}">
+                                            Next
+                                        </a>
+                                    </li>
+
+                                {% endif %}
+
+                            </ul>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- FILTER COURSE BY FACULTY -->
+
+<script>
+
+    const facultySelect = document.getElementById("faculty");
+    const courseSelect = document.getElementById("course");
+
+    function filterCourses() {
+
+        const facultyId = facultySelect.value;
+
+        const courses = courseSelect.querySelectorAll("option");
+
+        courses.forEach(function(course) {
+
+            if (course.value === "") {
+                course.style.display = "block";
+                return;
+            }
+
+            if (course.dataset.faculty === facultyId) {
+                course.style.display = "block";
+            }
+            else {
+                course.style.display = "none";
+            }
+
+        });
+
+    }
+
+
+    facultySelect.addEventListener("change", function() {
+
+        courseSelect.value = "";
+
+        filterCourses();
+
+    });
+
+
+    filterCourses();
+
+</script>
+
+{% endblock %}

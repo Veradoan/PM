@@ -1,0 +1,231 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Dashboard - AcademicShare{% endblock %}
+
+{% block content %}
+{% load humanize %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="fw-bold mb-0">Dashboard</h4>
+        <small class="text-muted">Tổng quan nhanh hoạt động hệ thống AcademicShare.</small>
+    </div>
+    <div class="text-muted fs-6">
+        <i class="fa-regular fa-calendar"></i>
+        Hôm nay: {% now "l, d \t\h\á\n\g n, Y" %}
+    </div>
+</div>
+
+<!-- 4 Thẻ Card thống kê -->
+<div class="row g-4 mb-4">
+    <!-- Card 1: Users -->
+    <div class="col-md-6 col-lg-3">
+        <div class="saas-card p-4 d-flex justify-content-between align-items-center h-100">
+            <div>
+                <h3 class="fw-bold mb-1">{{ total_users|default:"0"|intcomma }}</h3>
+                <span class="text-muted" style="font-size: 13px;">Tổng Người Dùng</span>
+            </div>
+            <div class="rounded p-3" style="background-color: #FCE7F3; color: var(--primary-color);">
+                <i class="fa-solid fa-users fa-lg"></i>
+            </div>
+        </div>
+    </div>
+    <!-- Card 2: Docs approved -->
+    <div class="col-md-6 col-lg-3">
+        <div class="saas-card p-4 d-flex justify-content-between align-items-center h-100">
+            <div>
+                <h3 class="fw-bold mb-1">{{ total_approved_docs|default:"0"|intcomma }}</h3>
+                <span class="text-muted" style="font-size: 13px;">Tài Liệu Đã Duyệt</span>
+            </div>
+            <div class="rounded p-3" style="background-color: #D1FAE5; color: var(--success);">
+                <i class="fa-solid fa-file-circle-check fa-lg"></i>
+            </div>
+        </div>
+    </div>
+    <!-- Card 3: Pending -->
+    <div class="col-md-6 col-lg-3">
+        <div class="saas-card p-4 d-flex justify-content-between align-items-center h-100">
+            <div>
+                <h3 class="fw-bold mb-1">{{ total_pending_docs|default:"0"|intcomma }}</h3>
+                <span class="text-muted" style="font-size: 13px;">Tài Liệu Chờ Duyệt</span>
+            </div>
+            <div class="rounded p-3" style="background-color: #FEF3C7; color: var(--warning);">
+                <i class="fa-solid fa-clock fa-lg"></i>
+            </div>
+        </div>
+    </div>
+    <!-- Card 4: Reports -->
+    <div class="col-md-6 col-lg-3">
+        <div class="saas-card p-4 d-flex justify-content-between align-items-center h-100">
+            <div>
+                <h3 class="fw-bold mb-1 text-danger">{{ total_pending_reports|default:"0"|intcomma }}</h3>
+                <span class="text-muted" style="font-size: 13px;">Báo Cáo Vi Phạm</span>
+            </div>
+            <div class="rounded p-3" style="background-color: #FEE2E2; color: var(--danger);">
+                <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick actions -->
+<div class="saas-card p-3 mb-4">
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'user_management' %}" class="btn btn-sm btn-outline-dark">
+            <i class="fa-solid fa-users me-1"></i> Quản lý người dùng
+        </a>
+        <a href="{% url 'admin_documents' %}" class="btn btn-sm btn-outline-dark">
+            <i class="fa-solid fa-file-lines me-1"></i> Quản lý tài liệu
+        </a>
+        <a href="{% url 'admin_reports' %}" class="btn btn-sm btn-outline-dark">
+            <i class="fa-solid fa-flag me-1"></i> Báo cáo vi phạm
+            {% if total_pending_reports %}<span class="badge bg-danger ms-1">{{ total_pending_reports }}</span>{% endif %}
+        </a>
+        <a href="{% url 'admin_faculties' %}" class="btn btn-sm btn-outline-dark">
+            <i class="fa-solid fa-building-columns me-1"></i> Khoa
+        </a>
+        <a href="{% url 'admin_courses' %}" class="btn btn-sm btn-outline-dark">
+            <i class="fa-solid fa-book me-1"></i> Môn học
+        </a>
+        <a href="{% url 'admin_statistics' %}" class="btn btn-sm btn-outline-dark">
+            <i class="fa-solid fa-chart-line me-1"></i> Thống kê
+        </a>
+    </div>
+</div>
+
+<!-- Charts Area -->
+<div class="row g-4 mb-4">
+    <!-- Line Chart: User Growth -->
+    <div class="col-lg-8">
+        <div class="saas-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">Tăng trưởng Người dùng (6 tháng qua)</h6>
+                <span class="badge bg-light text-dark border">Tháng / Người dùng mới</span>
+            </div>
+            <canvas id="userGrowthChart" height="100"></canvas>
+        </div>
+    </div>
+    <!-- Doughnut Chart: Doc Status -->
+    <div class="col-lg-4">
+        <div class="saas-card p-4 h-100">
+            <h6 class="fw-bold mb-3">Phân bố Trạng thái Tài liệu</h6>
+            <canvas id="docStatusChart" height="215"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="saas-card">
+    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="m-0 fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Hoạt Động Gần Đây</h5>
+        <span class="badge bg-light text-muted border">5 mới nhất</span>
+    </div>
+    <div class="p-0">
+        <ul class="list-group list-group-flush">
+            {% for activity in recent_activities %}
+            <li class="list-group-item px-4 py-3 d-flex align-items-center">
+                <div class="me-3">
+                    {% if activity.action == 'approve' %}
+                    <span class="text-success"><i class="fas fa-circle-check fa-lg"></i></span>
+                    {% elif activity.action == 'reject' %}
+                    <span class="text-danger"><i class="fas fa-circle-xmark fa-lg"></i></span>
+                    {% elif activity.action == 'resolve_report' %}
+                    <span class="text-primary"><i class="fas fa-flag-checkered fa-lg"></i></span>
+                    {% else %}
+                    <span class="text-secondary"><i class="fas fa-history fa-lg"></i></span>
+                    {% endif %}
+                </div>
+                <div class="flex-grow-1">
+                    <p class="mb-1">
+                        <strong>{{ activity.moderator.username }}</strong> đã
+                        {% if activity.action == 'approve' %}
+                            <span class="text-success fw-bold">duyệt</span>
+                        {% elif activity.action == 'reject' %}
+                            <span class="text-danger fw-bold">từ chối</span>
+                        {% elif activity.action == 'resolve_report' %}
+                            <span class="text-primary fw-bold">xử lý báo cáo</span>
+                        {% else %}
+                            <span class="fw-bold">{{ activity.get_action_display|default:activity.action }}</span>
+                        {% endif %}
+                        {% if activity.document %}
+                        tài liệu: <em>{{ activity.document.title|truncatechars:60 }}</em>
+                        {% endif %}
+                        {% if activity.reason %}<span class="text-muted small">— {{ activity.reason|truncatechars:80 }}</span>{% endif %}
+                    </p>
+                    <small class="text-muted">
+                        <i class="fa-regular fa-clock"></i> {{ activity.created_at|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+            </li>
+            {% empty %}
+            <li class="list-group-item empty-state">
+                <i class="fa-solid fa-inbox d-block mb-2"></i>
+                Chưa có hoạt động nào gần đây.
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Parse dữ liệu từ Django Backend
+        const docStatusData = JSON.parse('{{ doc_status_data|safe }}');
+        const userGrowthLabels = JSON.parse('{{ user_growth_labels|safe }}');
+        const userGrowthValues = JSON.parse('{{ user_growth_values|safe }}');
+
+        // 2. Biểu đồ đường (User Growth)
+        const ctxGrowth = document.getElementById('userGrowthChart').getContext('2d');
+        new Chart(ctxGrowth, {
+            type: 'line',
+            data: {
+                labels: userGrowthLabels,
+                datasets: [{
+                    label: 'Người dùng mới',
+                    data: userGrowthValues,
+                    borderColor: '#E65396',
+                    backgroundColor: 'rgba(230, 83, 150, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#E65396',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5] }, ticks: { precision: 0 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 3. Biểu đồ vành khăn (Doc Status)
+        const ctxStatus = document.getElementById('docStatusChart').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Đã duyệt', 'Chờ duyệt', 'Từ chối'],
+                datasets: [{
+                    data: docStatusData,
+                    backgroundColor: ['#16A36A', '#F59E0B', '#EF4444'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 12 } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

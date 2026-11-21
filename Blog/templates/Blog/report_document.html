@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-9">
+
+                <div class="blog-post-area">
+
+                    <h2 class="title text-center">
+                        Report Document
+                    </h2>
+
+                    <h3>
+                        {{ document.title }}
+                    </h3>
+
+                    <p>
+                        If you find a problem with this document,
+                        please select a reason and provide more details.
+                    </p>
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Report type -->
+                        <div style="margin-bottom: 20px;">
+
+                            <label>
+                                Report Reason
+                            </label>
+
+                            {{ form.report_type }}
+
+                        </div>
+
+
+                        <!-- Description -->
+                        <div style="margin-bottom: 20px;">
+
+                            <label>
+                                Description
+                            </label>
+
+                            {{ form.description }}
+
+                        </div>
+
+
+                        <button type="submit" class="btn btn-danger">
+                            Submit Report
+                        </button>
+
+                        <a href="{% url 'document_detail' document.id %}" class="btn btn-default">
+                            Cancel
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

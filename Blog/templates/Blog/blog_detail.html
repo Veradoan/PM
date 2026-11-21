@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* Nền trang chi tiết tài liệu (đồng bộ với Home): ảnh University + lớp phủ sáng để chữ dễ đọc */
+    html body {
+        background-image:
+            linear-gradient(rgba(20, 33, 61, 0.55), rgba(20, 33, 61, 0.55)),
+            url("{% static 'global/images/University.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    /* Khung nội dung, tiêu đề, ô nhập: dùng chung trong theme.css */
+</style>
+
+<section>
+	<div class="container">
+		<div class="row">
+
+			<div class="col-sm-9">
+				<div class="blog-post-area">
+
+					<!-- Document title -->
+					<h2 class="title text-center">
+						{{ document.title }}
+					</h2>
+
+					<!-- Document information -->
+					<div class="single-blog-post">
+
+						<div class="post-meta">
+							<ul>
+								<li>
+									<i class="fa fa-user"></i>
+									{{ document.uploaded_by.username }}
+								</li>
+
+								<li>
+									<i class="fa fa-clock-o"></i>
+									{{ document.created_at }}
+								</li>
+							</ul>
+						</div>
+
+						<!-- Description -->
+						{% if document.description %}
+						<p>
+							{{ document.description }}
+						</p>
+						{% endif %}
+
+						<!-- Faculty -->
+						{% if document.faculty %}
+						<p>
+							<strong>Faculty:</strong>
+							{{ document.faculty.name }}
+						</p>
+						{% endif %}
+
+						<!-- Course -->
+						{% if document.course %}
+						<p>
+							<strong>Course:</strong>
+							{{ document.course.name }}
+						</p>
+						{% endif %}
+
+						<!-- Document type -->
+						{% if document.doc_type %}
+						<p>
+							<strong>Document Type:</strong>
+							{{ document.get_doc_type_display }}
+						</p>
+						{% endif %}
+
+						<!-- Rating -->
+						<p>
+							<strong>Rating:</strong>
+							{{ avg }} / 5
+						</p>
+
+						<!-- AI Summary -->
+						{% if document.ai_summary %}
+						<div class="alert alert-info">
+							<h4>AI Summary</h4>
+							<p>{{ document.ai_summary }}</p>
+						</div>
+						{% endif %}
+						<!-- File -->
+						{% if document.file %}
+
+						<!-- PDF Preview -->
+						{% if document.file.name|lower|slice:"-4:" == ".pdf" %}
+						<div style="margin-top: 30px;">
+
+							<h3>Document Preview</h3>
+
+							<object data="{% url 'preview_document' document.id %}" type="application/pdf" width="100%"
+								height="600px" style="border: 1px solid #ddd;">
+
+								<p>
+									Your browser does not support PDF preview.
+									<a href="{% url 'preview_document' document.id %}" target="_blank">
+										Open PDF
+									</a>
+								</p>
+
+							</object>
+
+						</div>
+						{% endif %}
+
+						<!-- Download + Report -->
+						<div class="text-center" style="margin-top: 20px;">
+
+							<a href="{% url 'download_document' document.id %}" class="btn btn-primary">
+
+								<i class="fa fa-download"></i>
+								Download Document
+
+							</a>
+
+							{% if user.is_authenticated %}
+							<a href="{% url 'report_document' document.id %}" class="btn btn-danger">
+
+								<i class="fa fa-flag"></i>
+								Report Document
+
+							</a>
+							{% endif %}
+
+
+						</div>
+
+					</div>
+
+					<!-- Comments -->
+					<div class="response-area">
+						<h2 class="bold">
+							Comments
+						</h2>
+
+						{% for c in comment %}
+						<div class="media">
+
+							<div class="media-body">
+								<h4 class="media-heading">
+									{{ c.user.username }}
+								</h4>
+
+								<p>
+									{{ c.comment }}
+								</p>
+
+								<small>
+									{{ c.created_at }}
+								</small>
+							</div>
+
+						</div>
+
+						{% empty %}
+						<p>
+							No comments yet.
+						</p>
+						{% endfor %}
+					</div>
+
+				</div>
+
+
+			</div>
+
+			{% else %}
+
+			<p class="text-center">
+				Document file is not available.
+			</p>
+
+			{% endif %}
+
+		</div>
+	</div>
+</section>
+
+{% endblock %}

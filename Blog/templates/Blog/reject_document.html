@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-9">
+                <div class="blog-post-area">
+
+                    <h2 class="title text-center">
+                        Reject Document
+                    </h2>
+
+                    <h3>{{ document.title }}</h3>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="review_note">
+                                Feedback Note
+                            </label>
+
+                            <textarea
+                                name="review_note"
+                                id="review_note"
+                                class="form-control"
+                                rows="5"
+                                placeholder="Enter the reason for rejecting this document..."
+                                required
+                            ></textarea>
+                        </div>
+
+                        <br>
+
+                        <button type="submit" class="btn btn-danger">
+                            Reject Document
+                        </button>
+
+                        <a href="{% url 'pending_documents' %}"
+                           class="btn btn-secondary">
+                            Cancel
+                        </a>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
