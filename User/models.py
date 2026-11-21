@@ -22,6 +22,8 @@ class CustomUser(AbstractUser):
         choices=ROLE_CHOICES,
         default='student'
     )
+    def __str__(self):
+        return self.username
 
     avatar = models.ImageField(
         upload_to='avatar/',

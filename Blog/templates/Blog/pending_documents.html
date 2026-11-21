@@ -1,104 +1,135 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
+<div class="container mt-4">
+    <h2>Không gian kiểm duyệt (Moderator Workspace)</h2>
+    <hr>
 
-<section>
-    <div class="container">
-        <div class="row">
-
-            <div class="col-sm-9">
-                <div class="blog-post-area">
-
-                    <h2 class="title text-center">
-                        Pending Documents
-                    </h2>
-
-                    {% if documents %}
-
-                    {% for document in documents %}
-
-                    <div class="single-blog-post">
-
-                        <h3>{{ document.title }}</h3>
-
-                        <div class="post-meta">
-                            <ul>
-                                <li>
-                                    <i class="fa fa-user"></i>
-                                    {{ document.uploaded_by.username }}
-                                </li>
-
-                                <li>
-                                    <i class="fa fa-clock-o"></i>
-                                    {{ document.created_at }}
-                                </li>
-                            </ul>
-                        </div>
-
-                        {% if document.description %}
-                        <p>
-                            <strong>Description:</strong>
-                            {{ document.description }}
-                        </p>
-                        {% endif %}
-
-                        {% if document.faculty %}
-                        <p>
-                            <strong>Faculty:</strong>
-                            {{ document.faculty.name }}
-                        </p>
-                        {% endif %}
-
-                        {% if document.course %}
-                        <p>
-                            <strong>Course:</strong>
-                            {{ document.course.name }}
-                        </p>
-                        {% endif %}
-
-                        {% if document.doc_type %}
-                        <p>
-                            <strong>Document Type:</strong>
-                            {{ document.get_doc_type_display }}
-                        </p>
-                        {% endif %}
-
-                        <p>
-                            <strong>Status:</strong>
-                            {{ document.get_status_display }}
-                        </p>
-
-                        {% if document.file %}
-                        <a href="{{ document.file.url }}" class="btn btn-primary" target="_blank">
-                            <i class="fa fa-file"></i>
-                            View Document
-                        </a>
-                        {% endif %}
-                        <a href="{% url 'approve_document' document.id %}" class="btn btn-success">
-                            <i class="fa fa-check"></i>
-                            Approve
-                        </a>
-                        <a href="{% url 'reject_document' document.id %}" class="btn btn-danger">
-                            Reject
-                        </a>
-
-                    </div>
-
-                    {% endfor %}
-
-                    {% else %}
-
-                    <p class="text-center">
-                        No pending documents.
-                    </p>
-
-                    {% endif %}
-
+    <!-- PHẦN 1: CÁC THẺ THỐNG KÊ -->
+    <div class="row mb-4">
+        <div class="col-md-4 col-sm-6 mb-3">
+            <div class="card bg-warning text-dark h-100" style="border-radius: 10px;">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-file-alt"></i> Tài liệu chờ duyệt</h5>
+                    <p class="card-text display-6 fw-bold">{{ pending_docs_count }}</p>
+                    <small>Cần kiểm duyệt</small>
                 </div>
             </div>
+        </div>
 
+        <div class="col-md-4 col-sm-6 mb-3">
+            <a href="{% url 'pending_reports' %}" style="text-decoration: none;">
+                <div class="card bg-danger text-white h-100" style="border-radius: 10px;">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-flag"></i> Báo cáo vi phạm</h5>
+                        <p class="card-text display-6 fw-bold">{{ pending_reports_count }}</p>
+                        <small>Chưa giải quyết</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-3">
+            <a href="{% url 'moderation_history' %}" style="text-decoration: none;">
+                <div class="card bg-info text-white h-100" style="border-radius: 10px;">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-history"></i> Lịch sử</h5>
+                        <p class="card-text display-6 fw-bold">Xem</p>
+                        <small>Nhật ký hệ thống</small>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
-</section>
 
+    <!-- PHẦN 2: BẢNG DANH SÁCH TÀI LIỆU CHỜ DUYỆT -->
+    <h4 class="mb-3">Danh sách chi tiết</h4>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if documents %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Tiêu đề</th>
+                    <th>Người tải lên</th>
+                    <th>Ngày gửi</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td>
+                        {% if doc.file %}
+                            <a href="{{ doc.file.url }}" target="_blank">{{ doc.title }}</a>
+                        {% else %}
+                            {{ doc.title }}
+                        {% endif %}
+                    </td>
+                    <td>{{ doc.uploaded_by.username }}</td>
+                    <td>{{ doc.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <!-- FORM NÚT DUYỆT (Gửi POST) -->
+                        <form action="{% url 'api_approve_document' doc.id %}" method="POST" style="display:inline;"
+                            onsubmit="return confirm('Bạn có chắc chắn muốn DUYỆT tài liệu này không?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i> Duyệt
+                            </button>
+                        </form>
+
+                        <!-- NÚT MỞ MODAL TỪ CHỐI -->
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#rejectModal{{ doc.id }}">
+                            <i class="fas fa-times"></i> Từ chối
+                        </button>
+
+                        <!-- MODAL TỪ CHỐI -->
+                        <div class="modal fade" id="rejectModal{{ doc.id }}" tabindex="-1"
+                            aria-labelledby="rejectLabel{{ doc.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="{% url 'api_reject_document' doc.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="rejectLabel{{ doc.id }}">Từ chối tài liệu: {{ doc.title }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3 text-start">
+                                                <label for="reason" class="form-label">Lý do từ chối <span
+                                                        class="text-danger">*</span></label>
+                                                <textarea class="form-control" name="reason" rows="3" required
+                                                    placeholder="Nhập lý do tài liệu này bị từ chối..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Hủy</button>
+                                            <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">Hiện không có tài liệu nào chờ duyệt.</div>
+    {% endif %}
+</div>
 {% endblock %}

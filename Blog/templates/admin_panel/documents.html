@@ -1,0 +1,152 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% load humanize %}
+
+{% block title %}Quản lý Tài liệu - AcademicShare{% endblock %}
+
+{% block content %}
+<div class="saas-card">
+    <div class="p-3 d-flex justify-content-between align-items-center border-bottom flex-wrap gap-2">
+        <div>
+            <h5 class="m-0 fw-bold"><i class="fa-solid fa-file-lines me-2 text-primary"></i>Quản lý Tài liệu</h5>
+            <small class="text-muted">Tổng số bản ghi: {{ page_obj.paginator.count|intcomma }}</small>
+        </div>
+    </div>
+
+    <div class="p-3">
+        <!-- Bộ lọc -->
+        <form method="GET" class="row g-2 mb-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control"
+                       placeholder="Tìm theo tiêu đề, mô tả hoặc người đăng..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Đã duyệt</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Chờ duyệt</option>
+                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Từ chối</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-dark w-100"><i class="fas fa-filter"></i> Lọc</button>
+            </div>
+            <div class="col-md-1">
+                <a href="{% url 'admin_documents' %}" class="btn btn-outline-secondary w-100" title="Xóa lọc">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Người đăng</th>
+                        <th>Khoa / Môn</th>
+                        <th class="text-center">Lượt tải</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in page_obj %}
+                    <tr>
+                        <td>{{ d.id }}</td>
+                        <td>
+                            <strong>{{ d.title|truncatechars:60 }}</strong>
+                            {% if d.doc_type %}<br>
+                            <small class="text-muted">{{ d.get_doc_type_display|default:d.doc_type }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ d.uploaded_by.username|default:"—" }}</td>
+                        <td>
+                            {% if d.faculty %}<span class="badge bg-info text-dark">{{ d.faculty.name }}</span>{% endif %}
+                            {% if d.course %}<span class="badge bg-secondary">{{ d.course.name }}</span>{% endif %}
+                        </td>
+                        <td class="text-center">{{ d.download_count|default:0|intcomma }}</td>
+                        <td class="text-center">
+                            {% if d.status == 'approved' %}
+                            <span class="badge bg-success">Đã duyệt</span>
+                            {% elif d.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                            {% elif d.status == 'rejected' %}
+                            <span class="badge bg-danger">Từ chối</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ d.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td><small class="text-muted">{{ d.created_at|date:"d/m/Y" }}</small></td>
+                        <td class="text-end">
+                            <div class="d-inline-flex flex-wrap gap-1">
+                                {% if d.status != 'approved' %}
+                                <form action="{% url 'admin_documents' %}" method="POST"
+                                      onsubmit="return confirm('Duyệt tài liệu &quot;{{ d.title }}&quot;?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="approve">
+                                    <input type="hidden" name="document_id" value="{{ d.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Duyệt">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                {% if d.status != 'rejected' %}
+                                <form action="{% url 'admin_documents' %}" method="POST"
+                                      onsubmit="return confirm('Từ chối tài liệu &quot;{{ d.title }}&quot;?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject">
+                                    <input type="hidden" name="document_id" value="{{ d.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="Từ chối">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <form action="{% url 'admin_documents' %}" method="POST"
+                                      onsubmit="return confirm('Xóa vĩnh viễn tài liệu &quot;{{ d.title }}&quot;? Hành động không thể hoàn tác.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="document_id" value="{{ d.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fa-solid fa-folder-open d-block mb-2"></i>
+                            Không có tài liệu nào phù hợp.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-3">
+            <ul class="pagination justify-content-end">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}">Trước</a>
+                </li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&status={{ status_filter }}">Sau</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

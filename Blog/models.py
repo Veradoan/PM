@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from User.models import CustomUser
+from django.conf import settings
 
 
 class Faculty(models.Model):
@@ -88,11 +89,7 @@ class Document(models.Model):
         default='pending'
     )
 
-    review_note = models.TextField(
-        blank=True,
-        null=True
-    )
-
+   
     ai_summary = models.TextField(
         blank=True,
         null=True
@@ -111,6 +108,20 @@ class Document(models.Model):
         on_delete=models.CASCADE,
         related_name='uploaded_documents'
     )
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_documents',
+        help_text="Moderator hoặc Admin đã xử lý tài liệu này"
+    )
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Thời gian xử lý (duyệt/từ chối)"
+    )
+    review_note = models.TextField(blank=True, null=True, help_text="Lý do từ chối")
 
     def __str__(self):
         return self.title
@@ -141,6 +152,7 @@ class Rate(models.Model):
     class Meta:
         db_table = "rate"
         unique_together = ('user', 'document')
+        
 
     def __str__(self):
         return str(self.rate)
@@ -222,3 +234,20 @@ class Report(models.Model):
 
     def __str__(self):
         return f"{self.document.title} - {self.report_type}"
+class ModerationLog(models.Model):
+    ACTION_CHOICES = (
+        ('approve', 'Duyệt tài liệu'),
+        ('reject', 'Từ chối tài liệu'),
+        ('resolve_report', 'Xử lý báo cáo'),
+    )
+    
+    moderator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    document = models.ForeignKey('Document', on_delete=models.CASCADE, null=True, blank=True)
+    report = models.ForeignKey('Report', on_delete=models.CASCADE, null=True, blank=True)
+    reason = models.TextField(blank=True, null=True) # Dành cho lý do từ chối
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering = ['-created_at']
+    def __str__(self):
+        return f"{self.moderator.username} - {self.action} - {self.created_at}"

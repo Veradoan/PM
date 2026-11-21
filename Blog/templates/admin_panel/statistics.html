@@ -1,0 +1,199 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% load humanize %}
+
+{% block title %}Thống kê Đánh giá - AcademicShare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="fw-bold mb-0">Thống kê Đánh giá</h4>
+        <small class="text-muted">Tổng quan về điểm đánh giá và mức độ tương tác của người dùng.</small>
+    </div>
+</div>
+
+<!-- 3 thẻ tổng quan -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="saas-card p-4 d-flex justify-content-between align-items-center h-100">
+            <div>
+                <h3 class="fw-bold mb-1">{{ total_rates|default:"0"|intcomma }}</h3>
+                <span class="text-muted" style="font-size: 13px;">Tổng lượt đánh giá</span>
+            </div>
+            <div class="rounded p-3" style="background-color: #FCE7F3; color: var(--primary-color);">
+                <i class="fa-solid fa-star fa-lg"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="saas-card p-4 d-flex justify-content-between align-items-center h-100">
+            <div>
+                <h3 class="fw-bold mb-1 text-warning">{{ avg_global|default:"0" }} <small class="fs-6 text-muted">/ 5</small></h3>
+                <span class="text-muted" style="font-size: 13px;">Điểm trung bình toàn hệ thống</span>
+            </div>
+            <div class="rounded p-3" style="background-color: #FEF3C7; color: var(--warning);">
+                <i class="fa-solid fa-star-half-stroke fa-lg"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="saas-card p-4 d-flex justify-content-between align-items-center h-100">
+            <div>
+                <h3 class="fw-bold mb-1">{{ total_comments|default:"0"|intcomma }}</h3>
+                <span class="text-muted" style="font-size: 13px;">Tổng lượt bình luận</span>
+            </div>
+            <div class="rounded p-3" style="background-color: #DBEAFE; color: #2563EB;">
+                <i class="fa-solid fa-comments fa-lg"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2 biểu đồ -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="saas-card p-4 h-100">
+            <h6 class="fw-bold mb-3">Phân bố điểm đánh giá (1-5 sao)</h6>
+            <canvas id="rateDistributionChart" height="120"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="saas-card p-4 h-100">
+            <h6 class="fw-bold mb-3">Phân bố loại tài liệu</h6>
+            <canvas id="docTypeChart" height="120"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Top tài liệu đánh giá cao -->
+<div class="saas-card">
+    <div class="p-3 border-bottom">
+        <h5 class="m-0 fw-bold"><i class="fa-solid fa-trophy me-2 text-warning"></i>Top 10 tài liệu được đánh giá cao nhất</h5>
+    </div>
+    <div class="p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:50px">#</th>
+                        <th>Tiêu đề</th>
+                        <th class="text-center">Đánh giá TB</th>
+                        <th class="text-center">Số lượt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in top_documents %}
+                    <tr>
+                        <td><span class="badge bg-primary">{{ forloop.counter }}</span></td>
+                        <td><strong>{{ d.title|truncatechars:60 }}</strong></td>
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark">{{ d.avg_rate|floatformat:2 }} ★</span>
+                        </td>
+                        <td class="text-center">{{ d.rate_count|default:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <i class="fa-solid fa-folder-open d-block mb-2"></i>
+                            Chưa có dữ liệu đánh giá.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Top tài liệu tải nhiều -->
+<div class="saas-card">
+    <div class="p-3 border-bottom">
+        <h5 class="m-0 fw-bold"><i class="fa-solid fa-download me-2 text-success"></i>Top 10 tài liệu được tải nhiều nhất</h5>
+    </div>
+    <div class="p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:50px">#</th>
+                        <th>Tiêu đề</th>
+                        <th class="text-center">Lượt tải</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in top_downloads %}
+                    <tr>
+                        <td><span class="badge bg-success">{{ forloop.counter }}</span></td>
+                        <td><strong>{{ d.title|truncatechars:60 }}</strong></td>
+                        <td class="text-center">{{ d.download_count|default:0|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="empty-state">
+                            <i class="fa-solid fa-folder-open d-block mb-2"></i>
+                            Chưa có dữ liệu tải.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const rateLabels = JSON.parse('{{ rate_labels|safe }}');
+        const rateData = JSON.parse('{{ rate_data|safe }}');
+        const typeLabels = JSON.parse('{{ type_labels|safe }}');
+        const typeData = JSON.parse('{{ type_data|safe }}');
+
+        // Biểu đồ phân bố điểm đánh giá (Bar)
+        const ctxRate = document.getElementById('rateDistributionChart').getContext('2d');
+        new Chart(ctxRate, {
+            type: 'bar',
+            data: {
+                labels: rateLabels,
+                datasets: [{
+                    label: 'Số lượt đánh giá',
+                    data: rateData,
+                    backgroundColor: ['#EF4444', '#F97316', '#F59E0B', '#84CC16', '#16A36A'],
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 }, grid: { borderDash: [5, 5] } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Biểu đồ phân bố loại tài liệu (Doughnut)
+        const ctxType = document.getElementById('docTypeChart').getContext('2d');
+        new Chart(ctxType, {
+            type: 'doughnut',
+            data: {
+                labels: typeLabels.length ? typeLabels : ['Không có dữ liệu'],
+                datasets: [{
+                    data: typeData.length ? typeData : [1],
+                    backgroundColor: ['#E65396', '#3B82F6', '#16A36A', '#F59E0B', '#8B5CF6', '#EF4444'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 12 } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

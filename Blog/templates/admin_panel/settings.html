@@ -1,0 +1,169 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Cài đặt - AcademicShare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="fw-bold mb-0">Cài đặt Hệ thống</h4>
+        <small class="text-muted">Thông tin tổng quan và cấu hình hiện tại của AcademicShare.</small>
+    </div>
+</div>
+
+<!-- Thông tin hệ thống -->
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="saas-card">
+            <div class="p-3 border-bottom">
+                <h5 class="m-0 fw-bold"><i class="fa-solid fa-server me-2 text-primary"></i>Cấu hình Server</h5>
+            </div>
+            <div class="p-3">
+                <table class="table table-borderless mb-0">
+                    <tbody>
+                        <tr>
+                            <th class="text-muted" style="width: 50%;">Chế độ Debug</th>
+                            <td>
+                                {% if system_info.debug_mode %}
+                                <span class="badge bg-warning text-dark">Bật (DEV)</span>
+                                {% else %}
+                                <span class="badge bg-success">Tắt (PROD)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Múi giờ</th>
+                            <td>{{ system_info.time_zone }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Ngôn ngữ</th>
+                            <td>{{ system_info.language_code }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Phiên Django</th>
+                            <td>{{ system_info.django_version|default:"—" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="saas-card">
+            <div class="p-3 border-bottom">
+                <h5 class="m-0 fw-bold"><i class="fa-solid fa-database me-2 text-success"></i>Thống kê Dữ liệu</h5>
+            </div>
+            <div class="p-3">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center h-100">
+                            <div class="fw-bold fs-5 text-primary">{{ system_info.total_users }}</div>
+                            <small class="text-muted">Tổng người dùng</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center h-100">
+                            <div class="fw-bold fs-5 text-danger">{{ system_info.total_admins }}</div>
+                            <small class="text-muted">Admin</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center h-100">
+                            <div class="fw-bold fs-5 text-primary">{{ system_info.total_moderators }}</div>
+                            <small class="text-muted">Moderator</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center h-100">
+                            <div class="fw-bold fs-5 text-secondary">{{ system_info.total_students }}</div>
+                            <small class="text-muted">Student</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center h-100">
+                            <div class="fw-bold fs-5 text-info">{{ system_info.total_faculties }}</div>
+                            <small class="text-muted">Khoa</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center h-100">
+                            <div class="fw-bold fs-5 text-info">{{ system_info.total_courses }}</div>
+                            <small class="text-muted">Môn học</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center h-100">
+                            <div class="fw-bold fs-5 text-success">{{ system_info.total_documents }}</div>
+                            <small class="text-muted">Tài liệu</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center h-100">
+                            <div class="fw-bold fs-5 text-danger">{{ system_info.total_reports }}</div>
+                            <small class="text-muted">Báo cáo vi phạm</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thông tin tài khoản -->
+<div class="saas-card mt-4">
+    <div class="p-3 border-bottom">
+        <h5 class="m-0 fw-bold"><i class="fa-solid fa-user-shield me-2 text-primary"></i>Thông tin Tài khoản Admin</h5>
+    </div>
+    <div class="p-3">
+        <table class="table table-borderless mb-0">
+            <tbody>
+                <tr>
+                    <th class="text-muted" style="width: 25%;">Tên đăng nhập</th>
+                    <td><strong>{{ request.user.username }}</strong></td>
+                </tr>
+                <tr>
+                    <th class="text-muted">Email</th>
+                    <td>{{ request.user.email|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th class="text-muted">Vai trò</th>
+                    <td>
+                        {% if request.user.is_superuser %}
+                        <span class="badge bg-danger">Superuser</span>
+                        {% endif %}
+                        <span class="badge bg-danger">Admin</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-muted">Đăng nhập lần cuối</th>
+                    <td>{{ request.user.last_login|date:"d/m/Y H:i"|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th class="text-muted">Ngày tham gia</th>
+                    <td>{{ request.user.date_joined|date:"d/m/Y H:i" }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Cảnh báo -->
+<div class="saas-card border-warning">
+    <div class="p-3 border-bottom bg-warning bg-opacity-10">
+        <h5 class="m-0 fw-bold text-warning"><i class="fa-solid fa-triangle-exclamation me-2"></i>Khu vực Quản trị</h5>
+    </div>
+    <div class="p-3">
+        <p class="mb-2 text-muted">
+            Bạn đang truy cập khu vực quản trị với quyền <strong>Admin</strong>. Mọi thao tác xóa, đổi quyền, duyệt/từ chối tài liệu sẽ ảnh hưởng đến toàn hệ thống và được ghi log.
+        </p>
+        <p class="mb-0 text-muted">
+            Nhấn <strong>Đăng xuất</strong> khi không còn sử dụng để bảo mật tài khoản.
+        </p>
+        <div class="mt-3">
+            <a href="{% url 'admin_logout' %}" class="btn btn-outline-danger btn-sm">
+                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Đăng xuất ngay
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

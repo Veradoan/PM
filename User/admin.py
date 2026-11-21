@@ -1,23 +1,19 @@
 from django.contrib import admin
-from .models import Country, CustomUser
 from django.contrib.auth.admin import UserAdmin
-# Register your models here.
-
-
-
-
+from .models import Country, CustomUser
 
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-
     list_display = (
         'username',
         'email',
+        'role',
         'get_level',
         'first_name',
         'last_name',
         'is_active',
+        'is_staff',
     )
 
     search_fields = (
@@ -31,6 +27,10 @@ class CustomUserAdmin(UserAdmin):
         'is_superuser',
         'is_staff',
         'is_active',
+    )
+
+    fieldsets = UserAdmin.fieldsets + (
+        ('Thông tin phân quyền', {'fields': ('role',)}),
     )
 
     def get_level(self, obj):

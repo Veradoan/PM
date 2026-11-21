@@ -1,0 +1,137 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% load humanize %}
+
+{% block title %}Báo cáo Vi phạm - AcademicShare{% endblock %}
+
+{% block content %}
+<div class="saas-card">
+    <div class="p-3 d-flex justify-content-between align-items-center border-bottom flex-wrap gap-2">
+        <div>
+            <h5 class="m-0 fw-bold"><i class="fa-solid fa-flag me-2 text-danger"></i>Báo cáo Vi phạm</h5>
+            <small class="text-muted">Tổng số bản ghi: {{ page_obj.paginator.count|intcomma }}</small>
+        </div>
+        <div class="btn-group btn-group-sm">
+            <a href="{% url 'admin_reports' %}" class="btn {% if not status_filter %}btn-dark{% else %}btn-outline-dark{% endif %}">Tất cả</a>
+            <a href="{% url 'admin_reports' %}?status=pending" class="btn {% if status_filter == 'pending' %}btn-warning{% else %}btn-outline-warning{% endif %}">Chờ xử lý</a>
+            <a href="{% url 'admin_reports' %}?status=resolved" class="btn {% if status_filter == 'resolved' %}btn-success{% else %}btn-outline-success{% endif %}">Đã xử lý</a>
+        </div>
+    </div>
+
+    <div class="p-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Tài liệu bị báo cáo</th>
+                        <th>Loại báo cáo</th>
+                        <th>Người báo cáo</th>
+                        <th>Mô tả</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in page_obj %}
+                    <tr>
+                        <td>{{ r.id }}</td>
+                        <td>
+                            {% if r.document %}
+                            <strong>{{ r.document.title|truncatechars:50 }}</strong>
+                            {% else %}
+                            <span class="text-muted">(đã bị xóa)</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r.report_type %}
+                            <span class="badge bg-info text-dark">{{ r.get_report_type_display|default:r.report_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.user.username|default:"—" }}</td>
+                        <td>
+                            {% if r.description %}
+                            <small class="text-muted" title="{{ r.description }}">{{ r.description|truncatechars:60 }}</small>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td><small class="text-muted">{{ r.created_at|date:"d/m/Y H:i" }}</small></td>
+                        <td class="text-center">
+                            {% if r.resolved %}
+                            <span class="badge bg-success">Đã xử lý</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex flex-wrap gap-1">
+                                {% if not r.resolved %}
+                                <form action="{% url 'admin_reports' %}" method="POST"
+                                      onsubmit="return confirm('Đánh dấu báo cáo #{{ r.id }} là đã xử lý?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="resolve">
+                                    <input type="hidden" name="report_id" value="{{ r.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Đánh dấu đã xử lý">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form action="{% url 'admin_reports' %}" method="POST"
+                                      onsubmit="return confirm('Mở lại báo cáo #{{ r.id }}?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="unresolve">
+                                    <input type="hidden" name="report_id" value="{{ r.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Mở lại">
+                                        <i class="fas fa-rotate-left"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                {% if r.document %}
+                                <form action="{% url 'admin_reports' %}" method="POST"
+                                      onsubmit="return confirm('XÓA tài liệu &quot;{{ r.document.title }}&quot;? Hành động không thể hoàn tác.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_document">
+                                    <input type="hidden" name="report_id" value="{{ r.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa tài liệu bị báo cáo">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fa-solid fa-flag d-block mb-2"></i>
+                            Không có báo cáo nào.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-3">
+            <ul class="pagination justify-content-end">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">Trước</a>
+                </li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">Sau</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
